@@ -89,6 +89,7 @@ export default {
   border-top: 1px solid rgb(230, 227, 227);
   position: sticky;
   bottom: 0;
+  left: 0;
   z-index: 99;
   font-size: 0.3rem;
   color: #000000;

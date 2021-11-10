@@ -65,5 +65,19 @@ module.exports = {
     // `npm run build --report`
     // Set to `true` or `false` to always turn it on or off
     bundleAnalyzerReport: process.env.npm_config_report
-  }
+  },
+
+  devServer: {
+    proxy: {
+      '/apibus': {
+        target: 'https://dig.chouti.com',//接口的域名
+        changeOrigin: true,//是否跨域-是
+        pathRewrite: {
+          '^/apibus': ''//对应调用接口的地方，把原来的域名改成apibus
+        }
+      }
+    }
+  },
+
+
 }

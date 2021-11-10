@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <public-header v-if="header_show"></public-header>
-    <router-view v-on:header='header' v-on:footer='footer' />
+    <router-view v-on:header='header' v-on:footer='footer' class="article" />
     <public-bottom v-if="footer_show"></public-bottom>
   </div>
 </template>
@@ -40,5 +40,9 @@ export default {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.article {
+  min-height: 100vh;
 }
 </style>

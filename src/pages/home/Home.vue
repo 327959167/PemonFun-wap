@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <Notice></Notice>
+    <Notice :scroll="true"><template slot="noticeTxt">{{noticeTxt}}</template></Notice>
     <!-- banner轮播 -->
     <div class="swiper-container swiper_home">
       <div class="swiper-wrapper">
@@ -102,6 +102,7 @@ export default {
   components: { Notice, },
   data() {
     return {
+      noticeTxt: "没服务器没后台没接口，数据都是随便调的，以后有了再弄。唔吼吼吼……",
       // 轮播图
       banner: [
         {
@@ -247,6 +248,7 @@ export default {
     this.getKet();
     await this.getHotItem("101010100", this.key);
     this.swiper_home();
+    await this.xx();
   },
   methods: {
     swiper_home() {
@@ -286,6 +288,15 @@ export default {
             forbidClick: true
           });
         }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async xx() {
+      try {
+        let res = await this.$get('/link/hot?afterTime=1636516805037000&_=1636531282552');
+        console.log(res);
+        console.log();
       } catch (error) {
         console.log(error);
       }
@@ -357,6 +368,7 @@ export default {
   width: 100%;
   font-size: 0.4rem;
   font-weight: 400;
+  position: relative;
 
   .publicTitle {
     width: 100%;

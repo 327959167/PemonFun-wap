@@ -64,6 +64,7 @@ export default {
   background-color: @primary-color;
   position: sticky;
   top: 0;
+  left: 0;
   z-index: 99;
 
   .back,
