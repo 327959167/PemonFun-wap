@@ -1,0 +1,78 @@
+/* 开启flex布局 */
+.ub {
+  display: flex;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* ***************容器*************** */
+/* 改变轴向：纵轴、横轴、轴反转 */
+.ub-ver {
+  flex-direction: column;
+}
+.ub-h {
+  flex-direction: row;
+}
+.ub-ver-rev {
+  flex-direction: column-reverse;
+}
+.ub-h-rev {
+  flex-direction: row-reverse;
+}
+
+/* 项目换行：换行、不换行、换行反转 */
+.ub-wrap {
+  flex-wrap: wrap;
+}
+.ub-nowrap {
+  flex-wrap: nowrap;
+}
+.ub-wrap-rev {
+  flex-wrap: wrap-reverse;
+}
+
+/* 项目主轴对齐方式：居中、左对齐、右对齐、贴边、环绕 */
+.ub-pc {
+  justify-content: center;
+}
+.ub-ps {
+  justify-content: flex-start;
+}
+.ub-pe {
+  justify-content: flex-end;
+}
+.ub-pb {
+  justify-content: space-between;
+}
+.ub-pa {
+  justify-content: space-around;
+}
+
+/* 项目在交叉轴上如何对齐 */
+.ub-ac {
+  align-items: center;
+}
+.ub-as {
+  align-items: flex-start;
+}
+.ub-ae {
+  align-items: flex-end;
+}
+
+/* ***************项目*************** */
+/* 子元素 项目缩小比例：0不缩小，宽度可控、1缩小，宽度不可控 */
+.ub-shrink0 {
+  flex-shrink: 0;
+}
+.ub-shrink1 {
+  flex-shrink: 1;
+}
+
+/* 项目的放大比例 */
+.ub-grow0 {
+  flex-grow: 0;
+}
+
+.ub-f1 {
+  flex: 1;
+}
