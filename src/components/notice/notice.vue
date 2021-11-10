@@ -3,7 +3,7 @@
     <li class="ub-shrink0">
       <van-icon name="bullhorn-o" />
     </li>
-    <li class="ub-f1">基于字体的图标集，可以通过 Icon 组件使用，也可以在其他组件中通过 icon 属性引用。2基于字体的图标集，可以通过 Icon 组件使用，也可以在其他组件中通过 icon 属性引用。555555555555555</li>
+    <li class="ub-f1">基于字体的图标集，可以通过 Icon 组件使用，也可以在其他组件中通过 icon 属性引用。2基于字体的图标集，可以通过 Icon 组件使用，也可以在其他组件中通过 icon 属性引用。66666</li>
     <li class="ub-shrink0">
       <van-icon name="cross" />
     </li>
