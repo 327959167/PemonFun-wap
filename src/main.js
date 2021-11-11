@@ -5,7 +5,7 @@ import Vant from 'vant';
 import store from './store'
 import './utils/flexible.min'
 import 'vant/lib/index.css';
-import { post, get, patch, put } from './network/axios' // axios
+import { post, get, patch, put } from './network/axios'
 
 Vue.use(Vant);
 Vue.config.productionTip = false;

@@ -11,6 +11,23 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {},
+    proxyTable: {
+      '/apiGas': {
+        target: 'https://dig.chouti.com',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/apiGas': ''
+        }
+      },
+      '/api': {
+        target: 'https://www.bilibili.com',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': ''
+        }
+      }
+    },
+
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
@@ -66,18 +83,4 @@ module.exports = {
     // Set to `true` or `false` to always turn it on or off
     bundleAnalyzerReport: process.env.npm_config_report
   },
-
-  devServer: {
-    proxy: {
-      '/apibus': {
-        target: 'https://dig.chouti.com',//接口的域名
-        changeOrigin: true,//是否跨域-是
-        pathRewrite: {
-          '^/apibus': ''//对应调用接口的地方，把原来的域名改成apibus
-        }
-      }
-    }
-  },
-
-
 }

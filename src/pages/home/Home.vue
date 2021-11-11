@@ -15,15 +15,20 @@
       <div class="publicTitle"><span>每日头条</span></div>
       <div>
         <van-collapse v-model="activeName" accordion>
-          <van-collapse-item v-for="(item, index) in headlines" :title="item.title" :icon="item.icon" :name="index" :key="index" @click.native="unfold(item.id)">
+          <van-collapse-item v-for="(item, index) in headlines" :title="item.title" :icon="item.icon" :name="index" :key="index" @click.native="getHotItem(item.interface)">
             <ul class="hotItem">
-              <li class="ub" v-for="(skyItem,skyIndex) in headlinesHot" :key="skyIndex">
-                <div class="ub-shrink0">{{skyIndex}}</div>
-                <div class="ub-f1">最高气温{{skyItem.tempMax}}、{{skyItem.moonPhase}}、{{skyItem.windDirDay}}</div>
-                <div>
-                  <van-icon name="fire-o" color="#ee0a24" />&nbsp;<span>{{skyItem.tempMax}}万</span>
-                </div>
-              </li>
+              <div v-if="headlinesHot.length == 0" style="text-align:center;">
+                <van-loading size="24px">加载中...</van-loading>
+              </div>
+              <div v-else>
+                <li class="ub" v-for="(skyItem,skyIndex) in headlinesHot" :key="skyIndex">
+                  <div class="ub-shrink0">{{skyIndex}}</div>
+                  <div class="ub-f1">{{skyItem.title}}</div>
+                  <div>
+                    <van-icon name="fire-o" color="#ee0a24" />&nbsp;<span>{{skyItem.ups}}</span>
+                  </div>
+                </li>
+              </div>
             </ul>
           </van-collapse-item>
         </van-collapse>
@@ -32,30 +37,30 @@
     <!-- 柚头条 -->
     <div class="todayHot">
       <div class="publicTitle"><span>柚头条</span></div>
-      <div class="todayHot-toggle ub ub-pb">
-        <div class="ub-shrink0 active">时政要闻</div>
-        <div class="ub-shrink0">热搜话题</div>
-        <div class="ub-shrink0">饭圈娱乐</div>
-        <div class="ub-shrink0">“史”至今日</div>
+      <div class="todayHot-toggle ub">
+        <div class="ub-shrink0" v-for="(item,index) in youToggle" :key="item.id" :class="{active:youToggleIndex == index}" @click="getPemon(index,item.url)">{{item.txt}}</div>
       </div>
       <div class="ub ub-ver">
-        <div class="todayHot-item ub" v-for="(item, index) in youheadlines" :key="index">
-          <div class="left ub-shrink0">
-            <img :src="item.img" :alt="item.title" />
-          </div>
-          <div class="right ub-shrink0 ub-f1">
-            <div class="title">
-              <span class="circle">{{ item.ranking }}</span><span>{{ item.title }}</span>
+        <div v-if="youheadlines.length == 0" style="text-align:center;margin-top:1rem;">
+          <van-loading size="24px">加载中...</van-loading>
+        </div>
+        <div v-else>
+          <div class="todayHot-item ub" v-for="(itemYou, indexYou) in youheadlines" :key="indexYou">
+            <div class="left ub-shrink0 ub ub-ac">
+              <img :src="itemYou.img_url" :alt="itemYou.topicName" />
             </div>
-            <div class="txt">{{ item.txt }}</div>
-            <div class="watch ub-f1 ub ub-ac ub-pe">
-              <div class="ub ub-ac">
-                <van-icon name="fire-o" color="#ee0a24" /><span>{{
-                  item.hot
-                }}</span>
+            <div class="right ub-shrink0 ub-f1">
+              <div class="title">
+                <span class="circle">{{ indexYou+1 }}</span><span>{{ itemYou.topicName }}</span>
               </div>
-              <div class="ub ub-ac">
-                <van-icon name="eye-o" /><span>{{ item.watch }}</span>
+              <div class="txt">{{ itemYou.title }}</div>
+              <div class="watch ub-f1 ub ub-ac ub-pe">
+                <div class="ub ub-ac">
+                  <van-icon name="fire-o" color="#ee0a24" /><span>{{itemYou.ups}}</span>
+                </div>
+                <div class="ub ub-ac">
+                  <van-icon name="chat-o" /><span>{{ itemYou.comments_count }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -68,21 +73,21 @@
       <div class="ub ub-ver">
         <div class="todayHot-item ub" v-for="(item, index) in guesslike" :key="index">
           <div class="left ub-shrink0">
-            <img :src="item.img" :alt="item.title" />
+            <img :src="item.img_url" :alt="item.topicName" />
           </div>
           <div class="right ub-shrink0 ub-f1">
             <div class="title">
-              <span>{{ item.title }}</span>
+              <span>{{ item.topicName }}</span>
             </div>
-            <div class="txt">{{ item.txt }}</div>
+            <div class="txt">{{ item.title }}</div>
             <div class="watch ub-f1 ub ub-ac ub-pe">
               <div class="ub ub-ac">
                 <van-icon name="fire-o" color="#ee0a24" /><span>{{
-                  item.hot
+                  item.ups
                 }}</span>
               </div>
               <div class="ub ub-ac">
-                <van-icon name="eye-o" /><span>{{ item.watch }}</span>
+                <van-icon name="chat-o" /><span>{{ item.comments_count }}</span>
               </div>
             </div>
           </div>
@@ -97,12 +102,13 @@ import Swiper from "swiper";
 import "swiper/dist/css/swiper.min.css";
 import { Toast } from 'vant';
 import Notice from '../../components/notice/notice';
+import publicMethods from '../../utils/publicMethods.js';
 
 export default {
   components: { Notice, },
   data() {
     return {
-      noticeTxt: "没服务器没后台没接口，数据都是随便调的，以后有了再弄。唔吼吼吼……",
+      noticeTxt: "没服务器没后台没接口，数据接口都是网上随便调的，以后有了再弄。唔吼吼吼……",
       // 轮播图
       banner: [
         {
@@ -125,119 +131,75 @@ export default {
           img: "static/image/banner/banner1.jpg",
           introduce: "简易音乐播放器",
         },
-
       ],
-      // 头条(没接口，调和风api，id为城市)
+      // 每日头条
       headlines: [
         {
-          id: "101010100",
+          interface: "/link/hot?afterTime=1636558205018000&_=1636598630447",
           title: "微博",
           icon: "https://www.weibo.com/favicon.ico"
         },
         {
-          id: "101210106",
+          interface: "/link/news/hottest?afterScore=11172.689210249753&_=1636599885756",
           title: "今日头条",
           icon: "https://www.toutiao.com/favicon.ico"
         },
         {
-          id: "101020500",
+          interface: "/link/news/latest?afterTime=1636599814043000&_=1636600057386",
           title: "知乎",
           icon: "https://www.zhihu.com/favicon.ico"
         },
         {
-          id: "101010300",
+          interface: "/link/scoff/hottest?afterScore=11168.805907733333&_=1636600114544",
           title: "百度",
           icon: "https://www.baidu.com/favicon.ico"
         },
         {
-          id: "101210102",
+          interface: "/link/scoff/latest?afterTime=1636595258044000&_=1636600151976",
           title: "抖音",
           icon:
             "https://img0.baidu.com/it/u=1862947092,1516627745&fm=26&fmt=auto"
         },
         {
-          id: "101210111",
+          interface: "/link/pic/hottest?afterScore=0&_=1636600177609",
           title: "澎湃",
           icon: "https://www.thepaper.cn/favicon.ico"
         },
         {
-          id: "101011200",
+          interface: "/link/pic/latest?afterTime=0&_=1636600208132",
           title: "豆瓣",
           icon: "https://www.douban.com/favicon.ico"
         },
         {
-          id: "101010600",
+          interface: "/link/tec/hottest?afterScore=11169.320485955555&_=1636600245800",
           title: "掘金",
           icon: "https://www.juejin.cn/favicon.ico"
         }
       ],
       activeName: 0,
       headlinesHot: [],
-      keys: "t4aad804bcbe3640be8ec5b6054c680295df55",
-      key: "",
       // 柚头条
-      youheadlines: [
+      youToggle: [
         {
-          title: "花落的声音风知道",
-          ranking: "1",
-          img:
-            "https://img0.baidu.com/it/u=1411444766,613385027&fm=253&fmt=auto&app=120&f=JPEG?w=500&h=543",
-          txt:
-            "花落的声音风知道，思念的感觉心知道，变冷的温度冬知道，我的祝福你知道，没有华丽的词语，只想在渐冷的冬天为你送上暖暖的祝福！",
-          hot: "666",
-          watch: "1000+"
+          id: 0,
+          url: "/top/24hr?_=1636598630442",
+          txt: "24小时",
         },
         {
-          title: "温暖地方名字叫做家",
-          ranking: "2",
-          img:
-            "https://img2.baidu.com/it/u=694712720,3666666249&fm=26&fmt=auto",
-          txt:
-            "红色的花白色的纱娇羞的面颊，浅浅笑里说出一句愿意的回答，挽你的手在我臂弯越过天涯海角，走进一个温暖地方名字叫做家。  ",
-          hot: "555",
-          watch: "1000+"
+          id: 1,
+          url: "/top/72hr?_=1636598630443",
+          txt: "3天",
         },
         {
-          title: "别忘吃水饺",
-          ranking: "3",
-          img:
-            "https://img1.baidu.com/it/u=3214505320,479566342&fm=26&fmt=auto",
-          txt:
-            "人生的路途大雪怎能封锁，渴望的目标雾霾何以阻挡，温暖的真情江河不可阻隔，我的关怀短信冬至传送温暖。冬至了，注意保暖防寒进补强身，别忘吃水饺。",
-          hot: "888",
-          watch: "1000+"
-        }
+          id: 2,
+          url: "/top/168hr?_=1636598630444",
+          txt: "一周",
+        },
       ],
+      youToggleIndex: 0,
+      youheadlines: [],
       // 猜你喜欢
-      guesslike: [
-        {
-          title: "春播一粒“快乐籽”",
-          img:
-            "https://img1.baidu.com/it/u=2027348420,1537971446&fm=26&fmt=auto",
-          txt:
-            "春播一粒“快乐籽”，夏长一棵“如意苗”；春撒一滴“吉祥雨”，夏生一丛“幸福草”；春送一份“甜蜜情”，夏赠一份“安康愿”，春末夏初送祝福，愿你岁岁多福禄。",
-          hot: "666",
-          watch: "1000+"
-        },
-        {
-          title: "总是想：重见“故人”",
-          img:
-            "https://img1.baidu.com/it/u=205171831,1496452168&fm=26&fmt=auto",
-          txt:
-            "总是想：重见“故人”，重温“旧梦”，重提“旧事”，重叙“旧情”，虽然这些梦想暂时无法实现，但是发个信息给你，向你“陈情”我的思念，也是一种幸福，祝你安康！微笑是个搬运工，可以随时搬走压力；微笑是个维修工，可以轻松修复哀痛；微笑是个清洁工，可以认真扫除烦忧。",
-          hot: "555",
-          watch: "1000+"
-        },
-        {
-          title: "朋友，请每天保持微笑",
-          img:
-            "https://img2.baidu.com/it/u=3218240536,2878022222&fm=26&fmt=auto",
-          txt:
-            "朋友，请每天保持微笑，成为快乐的保管工，幸福的加油工！上班太烦，工作太乱，领导太粘，生活太酸，怎么办？",
-          hot: "888",
-          watch: "1000+"
-        }
-      ]
+      guesslike: []
     };
   },
   created() {
@@ -245,10 +207,10 @@ export default {
     this.$emit("footer", true);
   },
   async mounted() {
-    this.getKet();
-    await this.getHotItem("101010100", this.key);
+    await this.getHotItem(this.headlines[0].interface);
+    await this.getPemon(0, this.youToggle[0].url)
+    await this.getGuessLike()
     this.swiper_home();
-    await this.xx();
   },
   methods: {
     swiper_home() {
@@ -269,21 +231,42 @@ export default {
         },
       });
     },
-    getKet() {
-      let foo = this.keys.slice(2, this.keys.length - 4);
-      this.key = foo;
+    async getHotItem(url) {
+      let path = "/apiGas" + url
+      if (typeof (this.activeName) == 'number') {
+        try {
+          let res = await this.$get(path);
+          if (res.success && res.code == 200) {
+            this.headlinesHot = res.data
+          } else {
+            Toast({
+              message: '每日头条接口请求失败',
+              duration: 1500,
+              forbidClick: true
+            });
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        setTimeout(() => {
+          this.headlinesHot = [];
+        }, 300)
+
+      }
     },
-    async unfold(id) {
-      await this.getHotItem(id, this.key);
-    },
-    async getHotItem(location, key) {
+    async getPemon(index, url) {
+      this.youheadlines = []
+      this.youToggleIndex = index;
+      let path = "/apiGas" + url;
       try {
-        let res = await this.$get('https://devapi.qweather.com/v7/weather/3d', { location: location, key: key });
-        if (res.code == "200") {
-          this.headlinesHot = res.daily;
+        let res = await this.$get(path);
+
+        if (res.success && res.code == 200) {
+          this.youheadlines = res.data
         } else {
           Toast({
-            message: '接口请求失败',
+            message: '柚头条接口请求失败',
             duration: 1500,
             forbidClick: true
           });
@@ -292,11 +275,19 @@ export default {
         console.log(error);
       }
     },
-    async xx() {
+    async getGuessLike() {
+      let path = "/apiGas/man?afterTime=1636482148402000&_=1636612179653";
       try {
-        let res = await this.$get('/link/hot?afterTime=1636516805037000&_=1636531282552');
-        console.log(res);
-        console.log();
+        let res = await this.$get(path);
+        if (res.success && res.code == 200) {
+          this.guesslike = publicMethods.RandomArray(res.data, 6);
+        } else {
+          Toast({
+            message: '猜你喜欢接口请求失败',
+            duration: 1500,
+            forbidClick: true
+          });
+        }
       } catch (error) {
         console.log(error);
       }
@@ -306,73 +297,64 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.swiper-container {
-  width: 100%;
-  height: 5rem;
-  background-color: #81ecec;
-  position: relative;
+/deep/ .headlines .van-cell,
+/deep/ .van-collapse-item__content,
+/deep/ .van-cell__left-icon {
+  font-size: 0.4rem;
+  font-weight: 400;
+  color: #1a1a1a;
+  font-family: Microsoft YaHei;
 }
-.swiper-button-next,
-.swiper-button-prev {
-  width: 0.6rem;
-  height: 0.6rem;
-  background-size: 0.6rem 0.6rem !important;
-}
-.swiper-slide img {
-  width: 100%;
-  height: 100%;
-}
-/deep/.swiper-pagination-bullet {
-  width: 0.2rem !important;
-  height: 0.2rem !important;
-  border-radius: 50% !important;
-  transition: all 0.2s ease-in-out;
-  opacity: 0.3;
-}
-/deep/.swiper-pagination-bullet-active {
-  width: 0.4rem !important;
-  height: 0.2rem !important;
-  background: #74b9ff !important;
-  border-radius: 1rem !important;
-  opacity: 1;
-}
-
 /deep/ .headlines .van-cell {
   padding: 0.2rem 0.2rem !important;
 }
-
 /deep/ .van-collapse-item__content {
   padding-right: 0px;
 }
-
-.swiper_home .marsk {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 0.8rem;
-  line-height: 0.8rem;
-  color: #ffffff;
-  opacity: 0.8;
-  text-align: center;
-  background-color: rgba(0, 0, 0, 0.6);
-  padding: 0rem 0.5rem;
-  box-sizing: border-box;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  word-break: break-all;
+/deep/ .van-cell__left-icon {
+  margin-right: 0.3rem;
 }
 
 .home {
   width: 100%;
   font-size: 0.4rem;
   font-weight: 400;
+  color: #1a1a1a;
+  font-family: Microsoft YaHei;
   position: relative;
+  background-color: #f5f5f5;
 
+  .swiper-container {
+    width: 100%;
+    height: 5rem;
+    background-color: #ffffff;
+    position: relative;
+  }
+  .swiper-slide img {
+    width: 100%;
+    height: 100%;
+  }
+  .swiper_home .marsk {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0.8rem;
+    line-height: 0.8rem;
+    color: #ffffff;
+    opacity: 0.8;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 0rem 0.5rem;
+    box-sizing: border-box;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: break-all;
+  }
   .publicTitle {
     width: 100%;
-    padding-bottom: 0.1rem;
+    padding: 0.3rem 0rem;
     box-sizing: border-box;
     margin-bottom: 0.3rem;
     font-size: 0.5rem;
@@ -395,26 +377,34 @@ export default {
       }
     }
   }
-
   .publicTitle2 {
     margin-bottom: 0;
     margin-top: 1rem;
   }
-
   .todayHot {
-    width: 100%;
-    margin-top: 0.6rem;
-    padding: 0rem 0.35rem;
+    width: 96%;
+    margin: 0 auto;
+    padding: 0rem 0.25rem;
+    padding-bottom: 0.6rem;
     box-sizing: border-box;
+    border-radius: 0.3rem;
+    margin-top: 0.6rem;
+    background-color: #ffffff;
+
     .todayHot-toggle {
+      width: 100%;
+      overflow-x: auto;
       div {
+        min-width: 2rem;
         padding: 0rem 0.25rem;
         box-sizing: border-box;
-        height: 0.75rem;
-        line-height: 0.75rem;
+        height: 0.85rem;
+        line-height: 0.85rem;
         text-align: center;
-        border: 1px solid gray;
+        border: 1px solid lightgray;
         border-radius: 0.1rem;
+        margin-right: 0.3rem;
+        transition: all 0.3s ease-in-out;
       }
       .active {
         color: #ffffff;
@@ -427,10 +417,10 @@ export default {
       height: 3.5rem;
       padding: 0.3rem;
       box-sizing: border-box;
-      border: 1px solid lightgray;
       border-radius: 0.2rem;
       box-shadow: 0 0 0.3rem rgba(0, 0, 0, 0.3);
-      margin-top: 0.4rem;
+      margin-top: 0.5rem;
+      background-color: #ffffff;
 
       .left {
         width: 2.5rem;
@@ -438,8 +428,8 @@ export default {
         text-align: center;
         margin-right: 0.3rem;
         img {
-          width: 100%;
-          height: 100%;
+          width: 2.5rem;
+          height: 2.5rem;
         }
       }
       .right {
@@ -452,7 +442,7 @@ export default {
             text-align: center;
             line-height: 0.5rem;
             border-radius: 50%;
-            background-color: #d63031;
+            background-color: rgb(179, 178, 178);
             color: #ffffff;
             margin-right: 0.2rem;
           }
@@ -483,17 +473,38 @@ export default {
         }
       }
     }
-  }
 
+    .todayHot-item:nth-of-type(1) .circle {
+      background-color: #ff3d00 !important;
+    }
+    .todayHot-item:nth-of-type(2) .circle {
+      background-color: #ff6e00 !important;
+    }
+    .todayHot-item:nth-of-type(3) .circle {
+      background-color: #ffa600 !important;
+    }
+  }
   .headlines {
-    width: 100%;
-    margin-top: 0.6rem;
-    padding: 0rem 0.35rem;
+    width: 96%;
+    margin: 0 auto;
+    padding: 0rem 0.25rem;
+    padding-bottom: 0.6rem;
     box-sizing: border-box;
+    border-radius: 0.3rem;
+    margin-top: 0.6rem;
+    background-color: #ffffff;
   }
-
+  .hotItem li {
+    line-height: 0.6rem;
+    padding: 0.3rem 0rem;
+    box-sizing: border-box;
+    border-bottom: 1px dotted rgba(0, 0, 0, 0.2);
+  }
+  .hotItem li:last-of-type {
+    border-bottom: none;
+  }
   .hotItem li div:nth-of-type(1) {
-    width: 4%;
+    width: 6%;
     color: rgba(0, 0, 0, 0.54);
   }
   .hotItem li div:nth-of-type(2) {
@@ -505,16 +516,17 @@ export default {
     -webkit-line-clamp: 3;
     line-clamp: 3;
     -webkit-box-orient: vertical;
-    margin-bottom: 0.2rem;
   }
   .hotItem li div:nth-of-type(3) {
-    width: 18%;
+    width: 14%;
+    text-align: center;
     color: rgba(0, 0, 0, 0.54);
   }
   .hotItem li:nth-of-type(1) div:nth-of-type(1),
   .hotItem li:nth-of-type(2) div:nth-of-type(1),
   .hotItem li:nth-of-type(3) div:nth-of-type(1) {
     color: #f1403c;
+    font-weight: bold;
   }
 }
 </style>
