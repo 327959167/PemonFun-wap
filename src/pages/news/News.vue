@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  created() {
+  activated() {
     this.$emit('header', true);
     this.$emit('footer', true);
   },

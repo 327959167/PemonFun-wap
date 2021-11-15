@@ -5,7 +5,7 @@
 <script>
 export default {
   name: "funny",
-  created() {
+  activated() {
     this.$emit('header', false);
     this.$emit('footer', true);
   },

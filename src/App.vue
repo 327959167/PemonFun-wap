@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <public-header v-if="header_show"></public-header>
-    <router-view v-on:header='header' v-on:footer='footer' class="article" />
+    <keep-alive>
+      <router-view v-on:header='header' v-on:footer='footer' class="article" />
+    </keep-alive>
     <public-bottom v-if="footer_show"></public-bottom>
   </div>
 </template>

@@ -21,7 +21,7 @@
                 <van-loading size="24px">加载中...</van-loading>
               </div>
               <div v-else>
-                <li class="ub" v-for="(skyItem,skyIndex) in headlinesHot" :key="skyIndex">
+                <li class="ub" v-for="(skyItem,skyIndex) in headlinesHot" :key="skyIndex" @click="skip(skyItem.url)">
                   <div class="ub-shrink0">{{skyIndex}}</div>
                   <div class="ub-f1">{{skyItem.title}}</div>
                   <div>
@@ -45,7 +45,7 @@
           <van-loading size="24px">加载中...</van-loading>
         </div>
         <div v-else>
-          <div class="todayHot-item ub" v-for="(itemYou, indexYou) in youheadlines" :key="indexYou">
+          <div class="todayHot-item ub" v-for="(itemYou, indexYou) in youheadlines" :key="indexYou" @click="skip(itemYou.url)">
             <div class="left ub-shrink0 ub ub-ac">
               <img :src="itemYou.img_url" :alt="itemYou.topicName" />
             </div>
@@ -71,7 +71,7 @@
     <div class="todayHot">
       <div class="publicTitle publicTitle2"><span>猜你喜欢</span></div>
       <div class="ub ub-ver">
-        <div class="todayHot-item ub" v-for="(item, index) in guesslike" :key="index">
+        <div class="todayHot-item ub" v-for="(item, index) in guesslike" :key="index" @click="skip(item.url)">
           <div class="left ub-shrink0">
             <img :src="item.img_url" :alt="item.topicName" />
           </div>
@@ -202,7 +202,7 @@ export default {
       guesslike: []
     };
   },
-  created() {
+  activated() {
     this.$emit("header", true);
     this.$emit("footer", true);
   },
@@ -213,6 +213,9 @@ export default {
     this.swiper_home();
   },
   methods: {
+    skip(url) {
+      window.location.href = url;
+    },
     swiper_home() {
       new Swiper(".swiper_home", {
         loop: true,
