@@ -6,31 +6,30 @@
       <span :class="{active:toggleShow == 'hot'}" @click="toggle('hot')">最热</span>
     </div>
     <!-- 瀑布流 -->
-    <div class="waterfall ub ub-pb">
-      <ul class="waterfall-item ub-shrink0">
+    <div class="waterfall">
+      <ul class="waterfall-item ub-shrink0" v-for="(item,index) in newest" :key="index" @click="skip(item.url)">
         <li class="img">
-          <img src="https://img2.baidu.com/it/u=3444299095,3887359279&fm=26&fmt=auto" alt="xx">
-          <div class="marsk"></div>
+          <img v-lazy="item.img_url" :alt="item.title">
+          <div class="marsk">{{item.domain}}</div>
         </li>
-        <li class="label"><span>1111111111111111111111111111111111111111111111</span></li>
-        <li class="title">确定要申请的专业和院校，根据定的专业院校开始文书写作，确定推荐人，开始成绩认证</li>
+        <li class="label" v-if="item.topicName"><span>{{item.topicName}}</span></li>
+        <li class="title" v-if="item.title">{{item.title}}</li>
         <li class="talk ub">
           <span>
-            <van-icon name="fire-o" color="#ee0a24" />&nbsp;8
+            <van-icon name="fire-o" color="#ee0a24" />&nbsp;{{item.ups}}
           </span>
           <span>
-            <van-icon name="chat-o" />&nbsp;18
+            <van-icon name="chat-o" />&nbsp;{{item.commentsCount}}
           </span>
         </li>
-        <li class="ub">
-          <!-- <div><img src="https://img2.baidu.com/it/u=3444299095,3887359279&fm=26&fmt=auto" alt="xx"></div> -->
-          <div class="ub ub-ver">
-            <span>我看嚓卡斯卡迪那是肯定</span>
-            <span>4小时33分钟前发布</span>
+        <li class="ub base">
+          <div class="img ub-shrink0 ub ub-ac"><img v-lazy="item.submitted_user.img_url" :alt="item.submitted_user.nick"></div>
+          <div class="txt ub-f1 ub ub-ver">
+            <span>{{item.submitted_user.nick}}</span>
+            <span>{{item.action_time}}</span>
           </div>
         </li>
       </ul>
-
     </div>
   </div>
 </template>
@@ -44,12 +43,39 @@ export default {
   data() {
     return {
       toggleShow: "new",
+      newest: [],
     }
+  },
+  async mounted() {
+    await this.getNewest();
   },
   methods: {
     toggle(flag) {
       this.toggleShow = flag;
     },
+    skip(url) {
+      window.location.href = url;
+    },
+    async getNewest() {
+      let path = "/apiGas/link/pic/hottest?afterScore=0&_=1637305448330";
+      try {
+        let res = await this.$get(path);
+        if (res.success && res.code == 200) {
+          this.newest = res.data;
+        } else {
+          Toast({
+            message: '猜你喜欢接口请求失败',
+            duration: 1500,
+            forbidClick: true
+          });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+
+
   },
 }
 </script>
@@ -89,11 +115,14 @@ export default {
     margin-top: 0.5rem;
 
     .waterfall-item {
-      width: 49%;
+      width: 48%;
       background-color: #fff;
       border-radius: 0.15rem;
       overflow: hidden;
-      box-shadow: 0 8px 12px #ebedf0;
+      box-shadow: 0 8px 8px rgba(0, 0, 0, 0.5);
+      float: left;
+      margin-bottom: 2%;
+      margin-right: 2%;
       .label,
       .title,
       .talk {
@@ -101,13 +130,29 @@ export default {
         box-sizing: border-box;
       }
       .img {
+        position: relative;
+        background-color: #fff;
         img {
           width: 100%;
+        }
+        .marsk {
+          position: absolute;
+          bottom: 0.1rem;
+          left: 0;
+          width: 100%;
+          height: 0.6rem;
+          line-height: 0.6rem;
+          text-align: center;
+          color: #ffffff;
+          opacity: 0.6;
+          background: rgba(0, 0, 0, 0.4);
         }
       }
       .label {
         width: 100%;
         min-height: 0.4rem;
+        position: relative;
+
         span {
           display: inline-block;
           width: 80%;
@@ -123,12 +168,11 @@ export default {
           text-overflow: ellipsis;
           overflow: hidden;
           word-break: break-all;
-          position: relative;
           &::before {
             content: "";
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 0.1rem;
+            left: 0.2rem;
             width: 0.5rem;
             height: 0.5rem;
             background: url("../../../static/image/funny/comments_logo.png")
@@ -153,6 +197,31 @@ export default {
         border-bottom: 0.05rem dotted lightgray;
         span {
           margin-right: 0.5rem;
+        }
+      }
+      .base {
+        padding: 0.1rem 0.25rem;
+        box-sizing: border-box;
+      }
+      .base .img {
+        margin-right: 0.1rem;
+        img {
+          width: 1rem;
+          height: 1rem;
+          border-radius: 50%;
+          overflow: hidden;
+        }
+      }
+      .base .txt {
+        span {
+          display: inline-block;
+          width: 70%;
+          height: 0.6rem;
+          line-height: 0.6rem;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          word-break: break-all;
         }
       }
     }
