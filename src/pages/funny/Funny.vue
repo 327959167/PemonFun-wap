@@ -7,7 +7,7 @@
     </div>
     <!-- 瀑布流 -->
     <div class="waterfall">
-      <ul class="waterfall-item ub-shrink0" v-for="(item,index) in newest" :key="index" @click="skip(item.url)">
+      <ul class="waterfall-item ub-shrink0" ref="waterfallItem" v-for="(item,index) in newest" :key="index" @click="skip(item.url)">
         <li class="img">
           <img v-lazy="item.img_url" :alt="item.title">
           <div class="marsk">{{item.domain}}</div>
@@ -48,6 +48,7 @@ export default {
   },
   async mounted() {
     await this.getNewest();
+    this.waterFull();
   },
   methods: {
     toggle(flag) {
@@ -73,7 +74,28 @@ export default {
         console.log(error);
       }
     },
+    waterFull() {
+      let spacing = 0;
+      let divs = this.$refs.waterfallItem;
+      let len = divs.length;
+      let colWidth = divs[0].offsetWidth;
+      let cols = 2;
+      let height = new Array(cols);
+      height.fill(0);
 
+      for (let i = 0; i < len; i++) {			//循环迭代每一个div，设置定位
+        let colIndex = this.min(height);		//调用函数min，获取每一行的数组当中高度最短的下标
+        //设置定位
+        divs[i].style.top = height[colIndex] + 10 + "px";
+        divs[i].style.left = (colIndex + 1) * spacing + colIndex * colWidth + "px";
+        //累加列高度
+        height[colIndex] += divs[i].offsetHeight + 10;
+      }
+
+    },
+    min(array) {
+      return array.indexOf(Math.min(...array))    //将传递过来的数组当中最小值的下标返回
+    },
 
 
   },
@@ -113,6 +135,7 @@ export default {
     width: 96%;
     margin: 0 auto;
     margin-top: 0.5rem;
+    position: relative;
 
     .waterfall-item {
       width: 48%;
@@ -120,9 +143,10 @@ export default {
       border-radius: 0.15rem;
       overflow: hidden;
       box-shadow: 0 8px 8px rgba(0, 0, 0, 0.5);
-      float: left;
-      margin-bottom: 2%;
-      margin-right: 2%;
+      position: absolute;
+      // float: left;
+      // margin-bottom: 2%;
+      // margin-right: 2%;
       .label,
       .title,
       .talk {

@@ -417,7 +417,7 @@ export default {
       }
     }
     .todayHot-item {
-      height: 3.5rem;
+      height: 3.6rem;
       padding: 0.3rem;
       box-sizing: border-box;
       border-radius: 0.2rem;
@@ -452,7 +452,7 @@ export default {
         }
         .txt {
           width: 100%;
-          height: 1.4rem;
+          height: 1.5rem;
           line-height: 0.5rem;
           text-overflow: -o-ellipsis-lastline;
           overflow: hidden;
