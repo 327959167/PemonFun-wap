@@ -1,3 +1,4 @@
+// 数组内取任意个随机值
 let publicMethods = {};
 
 publicMethods.RandomArray = function (arr, count) {

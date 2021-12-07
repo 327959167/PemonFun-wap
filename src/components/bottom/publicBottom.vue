@@ -90,7 +90,7 @@ export default {
   position: sticky;
   bottom: 0;
   left: 0;
-  z-index: 99;
+  z-index: 999;
   font-size: 0.3rem;
   color: #000000;
   background-color: #fff;

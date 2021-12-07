@@ -140,12 +140,12 @@ export default {
           icon: "https://www.weibo.com/favicon.ico"
         },
         {
-          interface: "/link/news/hottest?afterScore=11172.689210249753&_=1636599885756",
+          interface: "/link/hot?afterTime=1638854405038000&_=1638868877594",
           title: "今日头条",
           icon: "https://www.toutiao.com/favicon.ico"
         },
         {
-          interface: "/link/news/latest?afterTime=1636599814043000&_=1636600057386",
+          interface: "/recommend/ajax?_=1638868984542",
           title: "知乎",
           icon: "https://www.zhihu.com/favicon.ico"
         },

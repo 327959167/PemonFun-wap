@@ -50,7 +50,7 @@ export default {
       this.showHotIntro = this.hotIncident[Math.floor((Math.random() * this.hotIncident.length))];
       setInterval(() => {
         this.showHotIntro = this.hotIncident[Math.floor((Math.random() * this.hotIncident.length))];
-      }, 3000)
+      }, 6000)
     },
   }
 }
@@ -65,7 +65,7 @@ export default {
   position: sticky;
   top: 0;
   left: 0;
-  z-index: 99;
+  z-index: 999;
 
   .back,
   .service {

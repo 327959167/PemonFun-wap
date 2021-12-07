@@ -5,16 +5,18 @@
       <router-view v-on:header='header' v-on:footer='footer' class="article" />
     </keep-alive>
     <public-bottom v-if="footer_show"></public-bottom>
+    <back-top></back-top>
   </div>
 </template>
 
 <script>
 import publicHeader from "@/components/header/publicHeader.vue";
 import publicBottom from '@/components/bottom/publicBottom.vue';
+import backTop from '@/components/backTop/backTop.vue';
 
 export default {
   name: "App",
-  components: { publicHeader, publicBottom },
+  components: { publicHeader, publicBottom, backTop },
   data() {
     return {
       header_show: true,
