@@ -40,8 +40,8 @@ export default {
 .backtop {
   width: 1rem;
   float: right;
-  background: rgba(82, 51, 51, 0.4);
-  position: sticky;
+  background: rgba(0, 0, 0, 0.4);
+  position: fixed;
   bottom: 2rem;
   right: 0.5rem;
   z-index: 999;

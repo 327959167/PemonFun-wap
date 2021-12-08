@@ -5,22 +5,22 @@
       <router-view v-on:header='header' v-on:footer='footer' class="article" />
     </keep-alive>
     <public-bottom v-if="footer_show"></public-bottom>
-    <back-top></back-top>
   </div>
 </template>
 
 <script>
 import publicHeader from "@/components/header/publicHeader.vue";
 import publicBottom from '@/components/bottom/publicBottom.vue';
-import backTop from '@/components/backTop/backTop.vue';
+
 
 export default {
   name: "App",
-  components: { publicHeader, publicBottom, backTop },
+  components: { publicHeader, publicBottom, },
   data() {
     return {
       header_show: true,
       footer_show: true,
+      barShow: "home",
     }
   },
   methods: {
@@ -30,6 +30,10 @@ export default {
     },
     //是否显示底部
     footer: function (bool) {
+      this.footer_show = bool;
+    },
+    // 目录
+    barShow: function (bool) {
       this.footer_show = bool;
     }
   }

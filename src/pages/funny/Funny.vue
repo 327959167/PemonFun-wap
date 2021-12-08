@@ -1,5 +1,7 @@
 <template>
   <div class="funny">
+    <!-- 回到顶部 -->
+    <back-top></back-top>
     <!-- 切换 -->
     <div class="toggle ub ub-ac">
       <span :class="{ active: toggleShow == 'hot' }" @click="toggle('hot')">最热</span>
@@ -46,7 +48,10 @@
 </template>
 
 <script>
+import BackTop from '../../components/backTop/backTop.vue';
+
 export default {
+  components: { BackTop, },
   activated() {
     this.$emit("header", true);
     this.$emit("footer", true);
@@ -55,8 +60,8 @@ export default {
     return {
       toggleShow: "hot",
       newest: [],
-      hot: "/apiGas/link/pic/hottest?afterScore=0&_=1637305448330",
-      new: "/apiGas/link/pic/latest?afterTime=0&_=1638857533110",
+      hot: "/apiGas/link/pic/hottest?afterScore=0",
+      new: "/apiGas/link/pic/latest?afterTime=0",
     };
   },
   async mounted() {
@@ -73,7 +78,10 @@ export default {
       window.location.href = url;
     },
     async getNewest(url) {
-      let path = url;
+      // 接口时间戳
+      let infTimestamp = `&_=${new Date().getTime()}`;
+      let path = url + infTimestamp;
+      // 时间戳
       var timestamp = new Date().getTime();
 
       try {

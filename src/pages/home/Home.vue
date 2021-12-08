@@ -1,6 +1,9 @@
 <template>
   <div class="home">
+    <!-- 通知 -->
     <Notice :scroll="true"><template slot="noticeTxt">{{noticeTxt}}</template></Notice>
+    <!-- 回到顶部 -->
+    <back-top></back-top>
     <!-- banner轮播 -->
     <div class="swiper-container swiper_home">
       <div class="swiper-wrapper">
@@ -103,9 +106,11 @@ import "swiper/dist/css/swiper.min.css";
 import { Toast } from 'vant';
 import Notice from '../../components/notice/notice';
 import publicMethods from '../../utils/publicMethods.js';
+import BackTop from '../../components/backTop/backTop.vue';
+
 
 export default {
-  components: { Notice, },
+  components: { Notice, BackTop, },
   data() {
     return {
       noticeTxt: "没服务器没后台没接口，数据接口都是网上随便调的，以后有了再弄。唔吼吼吼……",
@@ -135,12 +140,12 @@ export default {
       // 每日头条
       headlines: [
         {
-          interface: "/link/hot?afterTime=1636558205018000&_=1636598630447",
+          interface: "/link/hot?afterTime=1636558205018000",
           title: "微博",
           icon: "https://www.weibo.com/favicon.ico"
         },
         {
-          interface: "/link/hot?afterTime=1638854405038000&_=1638868877594",
+          interface: "/link/hot?afterTime=1638854405038000",
           title: "今日头条",
           icon: "https://www.toutiao.com/favicon.ico"
         },
@@ -150,28 +155,28 @@ export default {
           icon: "https://www.zhihu.com/favicon.ico"
         },
         {
-          interface: "/link/scoff/hottest?afterScore=11168.805907733333&_=1636600114544",
+          interface: "/link/scoff/hottest?afterScore=11168.805907733333",
           title: "百度",
           icon: "https://www.baidu.com/favicon.ico"
         },
         {
-          interface: "/link/scoff/latest?afterTime=1636595258044000&_=1636600151976",
+          interface: "/link/scoff/latest?afterTime=1636595258044000",
           title: "抖音",
           icon:
             "https://img0.baidu.com/it/u=1862947092,1516627745&fm=26&fmt=auto"
         },
         {
-          interface: "/link/pic/hottest?afterScore=0&_=1636600177609",
+          interface: "/link/pic/hottest?afterScore=0",
           title: "澎湃",
           icon: "https://www.thepaper.cn/favicon.ico"
         },
         {
-          interface: "/link/pic/latest?afterTime=0&_=1636600208132",
+          interface: "/link/pic/latest?afterTime=0",
           title: "豆瓣",
           icon: "https://www.douban.com/favicon.ico"
         },
         {
-          interface: "/link/tec/hottest?afterScore=11169.320485955555&_=1636600245800",
+          interface: "/link/tec/hottest?afterScore=11169.320485955555",
           title: "掘金",
           icon: "https://www.juejin.cn/favicon.ico"
         }
@@ -182,17 +187,17 @@ export default {
       youToggle: [
         {
           id: 0,
-          url: "/top/24hr?_=1636598630442",
+          url: "/top/24hr",
           txt: "24小时",
         },
         {
           id: 1,
-          url: "/top/72hr?_=1636598630443",
+          url: "/top/72hr",
           txt: "3天",
         },
         {
           id: 2,
-          url: "/top/168hr?_=1636598630444",
+          url: "/top/168hr",
           txt: "一周",
         },
       ],
@@ -235,7 +240,10 @@ export default {
       });
     },
     async getHotItem(url) {
-      let path = "/apiGas" + url
+      // 获取时间戳
+      let timestamp = `&_=${new Date().getTime()}`;
+      // &_=1636598630447
+      let path = "/apiGas" + url + timestamp;
       if (typeof (this.activeName) == 'number') {
         try {
           let res = await this.$get(path);
@@ -259,9 +267,10 @@ export default {
       }
     },
     async getPemon(index, url) {
+      let timestamp = `?_=${new Date().getTime()}`;
       this.youheadlines = []
       this.youToggleIndex = index;
-      let path = "/apiGas" + url;
+      let path = "/apiGas" + url + timestamp;
       try {
         let res = await this.$get(path);
 
@@ -279,7 +288,8 @@ export default {
       }
     },
     async getGuessLike() {
-      let path = "/apiGas/man?afterTime=1636482148402000&_=1636612179653";
+      let timestamp = `&_=${new Date().getTime()}`;
+      let path = `/apiGas/man?afterTime=1636482148402000${timestamp}`;
       try {
         let res = await this.$get(path);
         if (res.success && res.code == 200) {
