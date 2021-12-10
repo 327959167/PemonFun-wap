@@ -331,6 +331,7 @@ export default {
 
 .home {
   width: 100%;
+  min-height: calc(100vh - 3rem);
   font-size: 0.4rem;
   font-weight: 400;
   color: #1a1a1a;

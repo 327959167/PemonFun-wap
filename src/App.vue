@@ -2,7 +2,7 @@
   <div id="app">
     <public-header v-if="header_show"></public-header>
     <keep-alive>
-      <router-view v-on:header='header' v-on:footer='footer' v-on:bottomNavigation='bottomNavigation' class="article" />
+      <router-view v-on:header='header' v-on:footer='footer' v-on:bottomNavigation='bottomNavigation' />
     </keep-alive>
     <public-bottom v-if="footer_show" :barShow="barShow"></public-bottom>
   </div>
@@ -48,9 +48,5 @@ export default {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-.article {
-  min-height: 100vh;
 }
 </style>

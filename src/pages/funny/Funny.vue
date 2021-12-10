@@ -8,47 +8,53 @@
       <span :class="{ active: toggleShow == 'new' }" @click="toggle('new')">最新</span>
     </div>
     <!-- 瀑布流 -->
-    <div class="waterfall">
-      <div v-if="newest.length == 0">
-        <van-loading color="#0094ff" type="spinner" vertical size="24px">加载中...</van-loading>
+    <van-pull-refresh v-model="loading" @refresh="onRefresh">
+      <div class="waterfall">
+        <div v-if="newest.length == 0">
+          <van-loading color="#0094ff" type="spinner" vertical size="24px">加载中...</van-loading>
+        </div>
+        <div v-else>
+          <waterfall :col="2" :data="newest">
+            <ul class="waterfall-item ub-shrink0" v-for="(item, index) in newest" :key="index" @click="skip(item.url)">
+              <li class="img">
+                <img v-lazy="item.img_url" :alt="item.title" />
+                <div class="marsk">{{ item.domain }}</div>
+              </li>
+              <li class="label" v-if="item.topicName">
+                <span>{{ item.topicName }}</span>
+              </li>
+              <li class="title" v-if="item.title">{{ item.title }}</li>
+              <li class="talk ub">
+                <span>
+                  <van-icon name="fire-o" color="#ee0a24" />&nbsp;{{ item.ups }}
+                </span>
+                <span>
+                  <van-icon name="chat-o" />&nbsp;{{ item.commentsCount }}
+                </span>
+              </li>
+              <li class="ub base">
+                <div class="img ub-shrink0 ub ub-ac">
+                  <img v-lazy="item.submitted_user.img_url" :alt="item.submitted_user.nick" />
+                </div>
+                <div class="txt ub-f1 ub ub-ver">
+                  <span>{{ item.submitted_user.nick }}</span>
+                  <span>{{ item.action_time }}</span>
+                </div>
+              </li>
+            </ul>
+          </waterfall>
+          <div style="text-align:center;">
+            <van-button loading-text="加载中..." :loading="loading_more" class="loadMore" @click="loadMore">加载更多</van-button>
+          </div>
+        </div>
       </div>
-      <div v-else>
-        <waterfall :col="2" :data="newest">
-          <ul class="waterfall-item ub-shrink0" v-for="(item, index) in newest" :key="index" @click="skip(item.url)">
-            <li class="img">
-              <img v-lazy="item.img_url" :alt="item.title" />
-              <div class="marsk">{{ item.domain }}</div>
-            </li>
-            <li class="label" v-if="item.topicName">
-              <span>{{ item.topicName }}</span>
-            </li>
-            <li class="title" v-if="item.title">{{ item.title }}</li>
-            <li class="talk ub">
-              <span>
-                <van-icon name="fire-o" color="#ee0a24" />&nbsp;{{ item.ups }}
-              </span>
-              <span>
-                <van-icon name="chat-o" />&nbsp;{{ item.commentsCount }}
-              </span>
-            </li>
-            <li class="ub base">
-              <div class="img ub-shrink0 ub ub-ac">
-                <img v-lazy="item.submitted_user.img_url" :alt="item.submitted_user.nick" />
-              </div>
-              <div class="txt ub-f1 ub ub-ver">
-                <span>{{ item.submitted_user.nick }}</span>
-                <span>{{ item.action_time }}</span>
-              </div>
-            </li>
-          </ul>
-        </waterfall>
-      </div>
-    </div>
+    </van-pull-refresh>
   </div>
 </template>
 
 <script>
 import BackTop from '../../components/backTop/backTop.vue';
+import { Toast } from 'vant';
 
 export default {
   components: { BackTop, },
@@ -61,8 +67,10 @@ export default {
     return {
       toggleShow: "hot",
       newest: [],
-      hot: "/apiGas/link/pic/hottest?afterScore=0",
-      new: "/apiGas/link/pic/latest?afterTime=0",
+      hot: "/apiGas/link/pic/hottest",
+      new: "/apiGas/link/pic/latest",
+      loading: false,
+      loading_more: false,
     };
   },
   async mounted() {
@@ -78,29 +86,32 @@ export default {
     skip(url) {
       window.location.href = url;
     },
+    filterTime(arr) {
+      // 时间戳
+      var timestamp = new Date().getTime();
+      arr.forEach((item, index) => {
+        let foo1 = timestamp - (item.action_time / 1000);
+        let realy = Math.floor(foo1 / 1000)
+        let h = Math.floor(realy / 3600)
+        let m = Math.floor(realy % 3600 / 60)
+        if (h != 0) {
+          var str = `${h}小时${m}分前发布`
+        } else {
+          var str = `${m}分钟前发布`
+        }
+        item.action_time = str;
+      })
+      return arr;
+    },
     async getNewest(url) {
       // 接口时间戳
       let infTimestamp = `&_=${new Date().getTime()}`;
-      let path = url + infTimestamp;
-      // 时间戳
-      var timestamp = new Date().getTime();
-
+      let param = { 'afterScore': 0, '&_=': infTimestamp, }
       try {
-        let res = await this.$get(path);
+        let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
           this.newest = res.data;
-          this.newest.forEach((item, index) => {
-            let foo1 = timestamp - (item.action_time / 1000);
-            let realy = Math.floor(foo1 / 1000)
-            let h = Math.floor(realy / 3600)
-            let m = Math.floor(realy % 3600 / 60)
-            if (h != 0) {
-              var str = `${h}小时${m}分前发布`
-            } else {
-              var str = `${m}分钟前发布`
-            }
-            item.action_time = str;
-          })
+          this.newest = this.filterTime(this.newest);
         } else {
           Toast({
             message: "猜你喜欢接口请求失败",
@@ -112,6 +123,78 @@ export default {
         console.log(error);
       }
     },
+    // 下拉刷新
+    async getNewest2(url) {
+      let infTimestamp = `&_=${new Date().getTime()}`;
+      let param = { 'afterScore': 0, '&_=': infTimestamp, }
+      try {
+        let res = await this.$get(url, param);
+        if (res.success && res.code == 200) {
+          this.newest = res.data;
+          this.newest = this.filterTime(this.newest);
+          this.loading = false;
+          Toast('刷新成功');
+        } else {
+          Toast({
+            message: "猜你喜欢接口请求失败",
+            duration: 1500,
+            forbidClick: true
+          });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async onRefresh() {
+      let flag;
+      this.toggleShow == 'new' ? flag = "/apiGas/link/pic/latest" : flag = "/apiGas/link/pic/hottest";
+      await this.getNewest2(flag);
+    },
+    // 加载更多
+    async loadMore() {
+      this.loading_more = true;
+      let flag;
+      this.toggleShow == 'new' ? flag = "/apiGas/link/pic/latest" : flag = "/apiGas/link/pic/hottest";
+      await this.getNewest3(flag);
+    },
+    async getNewest3(url) {
+      let num = this.randomNum(11224, 11226);
+      let infTimestamp = `&_=${new Date().getTime()}`;
+      let param = { 'afterScore': num, '&_=': infTimestamp, }
+      try {
+        let res = await this.$get(url, param);
+        if (res.success && res.code == 200) {
+          let foo = [];
+          foo = res.data;
+          foo = this.filterTime(foo);
+          foo.forEach((item, index) => {
+            this.newest.push(item);
+          })
+          this.loading_more = false;
+        } else {
+          Toast({
+            message: "猜你喜欢接口请求失败",
+            duration: 1500,
+            forbidClick: true
+          });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    randomNum(minNum, maxNum) {
+      switch (arguments.length) {
+        case 1:
+          return parseFloat(Math.random() * minNum + 1, 10);
+          break;
+        case 2:
+          return parseFloat(Math.random() * (maxNum - minNum + 1) + minNum, 10);
+          break;
+        default:
+          return 0;
+          break;
+      }
+    }
   }
 };
 </script>
@@ -122,6 +205,7 @@ export default {
 }
 .funny {
   width: 100%;
+  min-height: 100vh;
   font-size: 0.4rem;
   font-weight: 400;
   color: #1a1a1a;
@@ -263,6 +347,21 @@ export default {
         }
       }
     }
+  }
+
+  .loadMore {
+    width: 3rem;
+    height: 1rem;
+    margin: 0 auto;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1rem;
+    font-weight: bolder;
+    text-align: center;
+    border-radius: 0.1rem;
+    transition: all 0.2s ease-in-out;
+    background-color: #f8aa00;
+    color: #fff;
   }
 }
 </style>

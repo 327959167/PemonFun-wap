@@ -12,3 +12,9 @@ export default {
   },
 }
 </script>
+
+<style lang="less" scoped>
+.mine {
+  min-height: calc(100vh - 1.8rem);
+}
+</style>
