@@ -8,6 +8,7 @@ export default {
   activated() {
     this.$emit('header', false);
     this.$emit('footer', true);
+    this.$emit("bottomNavigation", 'mine');
   },
 }
 </script>

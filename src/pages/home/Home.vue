@@ -210,6 +210,7 @@ export default {
   activated() {
     this.$emit("header", true);
     this.$emit("footer", true);
+    this.$emit("bottomNavigation", 'home');
   },
   async mounted() {
     await this.getHotItem(this.headlines[0].interface);

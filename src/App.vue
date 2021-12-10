@@ -2,9 +2,9 @@
   <div id="app">
     <public-header v-if="header_show"></public-header>
     <keep-alive>
-      <router-view v-on:header='header' v-on:footer='footer' class="article" />
+      <router-view v-on:header='header' v-on:footer='footer' v-on:bottomNavigation='bottomNavigation' class="article" />
     </keep-alive>
-    <public-bottom v-if="footer_show"></public-bottom>
+    <public-bottom v-if="footer_show" :barShow="barShow"></public-bottom>
   </div>
 </template>
 
@@ -20,22 +20,22 @@ export default {
     return {
       header_show: true,
       footer_show: true,
-      barShow: "home",
+      barShow: "",
     }
   },
   methods: {
     //是否显示头部
-    header: function (bool) {
+    header(bool) {
       this.header_show = bool;
     },
     //是否显示底部
-    footer: function (bool) {
+    footer(bool) {
       this.footer_show = bool;
     },
-    // 目录
-    barShow: function (bool) {
-      this.footer_show = bool;
-    }
+    // 底部导航
+    bottomNavigation(bar1) {
+      this.barShow = bar1;
+    },
   }
 }
 </script>
