@@ -114,7 +114,6 @@ import Notice from '../../components/notice/notice';
 import publicMethods from '../../utils/publicMethods.js';
 import BackTop from '../../components/backTop/backTop.vue';
 
-
 export default {
   components: { Notice, BackTop, },
   data() {

@@ -15,7 +15,7 @@ export default new Router({
   routes: [
     {
       path: '/',
-      redirect: '/login'
+      redirect: '/login',
     },
     {
       path: '/login',
@@ -33,6 +33,7 @@ export default new Router({
       component: Home,
       meta: {
         islogin: true,
+        keepAlive: true
       }
     },
     {
@@ -41,6 +42,7 @@ export default new Router({
       component: News,
       meta: {
         islogin: true,
+        keepAlive: true
       }
     },
     {
@@ -49,6 +51,7 @@ export default new Router({
       component: Funny,
       meta: {
         islogin: true,
+        keepAlive: true
       }
     },
     {
@@ -57,9 +60,19 @@ export default new Router({
       component: Mine,
       meta: {
         islogin: true,
+        keepAlive: true
       }
     },
-  ]
+  ],
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      console.log(savedPosition, ">>>>");
+      return { x: 0, y: 0 } //期望滚动到哪个的位置
+    }
+  },
+
 })
 
 const VueRouterPush = Router.prototype.push

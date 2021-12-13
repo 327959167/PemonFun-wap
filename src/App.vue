@@ -2,8 +2,9 @@
   <div id="app">
     <public-header v-if="header_show"></public-header>
     <keep-alive>
-      <router-view v-on:header='header' v-on:footer='footer' v-on:bottomNavigation='bottomNavigation' />
+      <router-view v-if="$route.meta.keepAlive" v-on:header='header' v-on:footer='footer' v-on:bottomNavigation='bottomNavigation' />
     </keep-alive>
+    <router-view v-if="!$route.meta.keepAlive" v-on:header='header' v-on:footer='footer' v-on:bottomNavigation='bottomNavigation' />
     <public-bottom v-if="footer_show" :barShow="barShow"></public-bottom>
   </div>
 </template>
