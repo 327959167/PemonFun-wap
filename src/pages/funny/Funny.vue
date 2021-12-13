@@ -71,6 +71,7 @@ export default {
       new: "/apiGas/link/pic/latest",
       loading: false,
       loading_more: false,
+      currentIndex: 2,
     };
   },
   async mounted() {
@@ -104,9 +105,17 @@ export default {
       return arr;
     },
     async getNewest(url) {
+      let flag;
+      let param
+      this.toggleShow == 'new' ? flag = 'new' : flag = 'hot';
       // 接口时间戳
       let infTimestamp = `&_=${new Date().getTime()}`;
-      let param = { 'afterScore': 0, '&_=': infTimestamp, }
+      if (flag == 'hot') {
+        param = { 'afterScore': 0, '&_=': infTimestamp, }
+      } else if (flag == 'new') {
+        param = { 'afterTime': 0, '&_=': infTimestamp, }
+      }
+
       try {
         let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
@@ -125,8 +134,17 @@ export default {
     },
     // 下拉刷新
     async getNewest2(url) {
+      let flag;
+      let param
+      this.toggleShow == 'new' ? flag = 'new' : flag = 'hot';
+      // 接口时间戳
       let infTimestamp = `&_=${new Date().getTime()}`;
-      let param = { 'afterScore': 0, '&_=': infTimestamp, }
+      if (flag == 'hot') {
+        param = { 'afterScore': 0, '&_=': infTimestamp, }
+      } else if (flag == 'new') {
+        param = { 'afterTime': 0, '&_=': infTimestamp, }
+      }
+
       try {
         let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
@@ -158,9 +176,22 @@ export default {
       await this.getNewest3(flag);
     },
     async getNewest3(url) {
-      let num = this.randomNum(11224, 11226);
+      let flag;
+      let param
+      this.toggleShow == 'new' ? flag = 'new' : flag = 'hot';
+      // 接口时间戳
       let infTimestamp = `&_=${new Date().getTime()}`;
-      let param = { 'afterScore': num, '&_=': infTimestamp, }
+      if (flag == 'hot') {
+        let num = this.randomNum(11224, 11226);
+        param = { 'afterScore': num, '&_=': infTimestamp, }
+      } else if (flag == 'new') {
+        let n1 = parseInt(new Date().getTime());
+        let n2 = parseInt(this.currentIndex * 60 * 60 * 1000)
+        let n3 = n1 - n2;
+        this.currentIndex += 2;
+        param = { 'afterTime': n3 * 1000, '&_=': infTimestamp, }
+      }
+
       try {
         let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
@@ -189,6 +220,19 @@ export default {
           break;
         case 2:
           return parseFloat(Math.random() * (maxNum - minNum + 1) + minNum, 10);
+          break;
+        default:
+          return 0;
+          break;
+      }
+    },
+    randomNum2(minNum, maxNum) {
+      switch (arguments.length) {
+        case 1:
+          return parseInt(Math.random() * minNum + 1, 10);
+          break;
+        case 2:
+          return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
           break;
         default:
           return 0;

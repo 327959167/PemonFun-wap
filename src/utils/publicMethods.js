@@ -7,6 +7,7 @@ publicMethods.RandomArray = function (arr, count) {
     let index = Math.random() * arr.length;
     resultArray.push(arr.slice(parseInt(index), parseInt(index) + 1)[0]);
   }
+  resultArray = [...new Set(resultArray)]
   return resultArray;
 };
 
