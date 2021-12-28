@@ -4,20 +4,19 @@
     <div class="toggle ub ub-ac">
       <span v-for="(item,index) in toggle" :key="index" :class="{active:item.flag}" @click="cut(item.txt,item.url)">{{item.txt}}</span>
     </div>
-    <van-pull-refresh v-model="loading" @refresh="onRefresh">
-      <div v-if="newsList.length == 0" style="margin-top:1rem;">
-        <van-loading color="#0094ff" type="spinner" vertical size="24px">加载中...</van-loading>
-      </div>
-      <div v-else>
-        <ul class="article">
-          <li class="ub" v-for="(item,index) in newsList" :key="index">
-            <div class="top ub ub-ver ub-f1 ub-pb">
-              <div class="txt">{{item.title}}</div>
-              <div class="time">{{item.created_time}}</div>
-            </div>
-            <div class="bottom"><img v-lazy="item.img_url" alt="柚文"></div>
-          </li>
-        </ul>
+    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+      <ul class="article">
+        <li class="ub" v-for="(item,index) in newsList" :key="index">
+          <div class="top ub ub-ver ub-f1 ub-pb">
+            <div class="txt">{{item.title}}</div>
+            <div class="time">{{item.created_time}}</div>
+          </div>
+          <div class="bottom"><img v-lazy="item.img_url" alt="柚文"></div>
+        </li>
+
+      </ul>
+      <div style="text-align:center;" v-if="newsList.length != 0">
+        <van-button loading-text="加载中..." :loading="loadmore" class="loadMore" @click="onloadMore">加载更多</van-button>
       </div>
     </van-pull-refresh>
   </div>
@@ -30,14 +29,16 @@ export default {
   components: { backTop },
   data() {
     return {
+      newsList: [],
       toggle: [
         { txt: "最新热文", flag: true, url: "/apiGas/link/news/hottest", afterScore: null, },
         { txt: "人类发布", flag: false, url: "/apiGas/man", afterTime: null, },
         { txt: "幽默段子", flag: false, url: "/apiGas/link/scoff/hottest", afterScore: null, },
         { txt: "求助问答", flag: false, url: "/apiGas/link/ask/hottest", afterScore: null, },
       ],
-      newsList: [],
-      loading: false,
+
+      refreshing: false,
+      loadmore: false,
     }
   },
   activated() {
@@ -49,6 +50,7 @@ export default {
     await this.getNews(this.toggle[0].url)
   },
   methods: {
+    // 导航切换
     async cut(txt, url) {
       this.newsList = [];
       this.toggle.forEach((item, index) => {
@@ -56,14 +58,16 @@ export default {
       })
       await this.getNews(url)
     },
+    // 接口调用
     async getNews(url) {
-      let param, flag;
+      let param, flag = false;
       let infTimestamp = new Date().getTime();
       param = { 'afterScore': 0, '&_': infTimestamp, }
       try {
         let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
-          this.newsList = res.data
+          this.newsList = res.data;
+          this.newsList = this.filterTime(this.newsList);
           flag = true;
           return flag;
         } else {
@@ -77,22 +81,45 @@ export default {
         console.log(error);
       }
     },
+    // 下拉刷新
     async onRefresh() {
       let url;
       this.toggle.forEach((item, index) => {
         item.flag == true ? url = item.url : "";
       })
-      let flag = await this.getNews(url)
+      let flag = await this.getNews(url);
       if (flag) {
-        this.loading = false;
-        Toast.success('刷新成功');
-      } else {
+        this.refreshing = false;
+        Toast.success("刷新成功！")
+      }
+      else {
         Toast({
-          message: "刷新失败",
+          message: "刷新失败~~",
           duration: 1500,
           forbidClick: true
         });
       }
+    },
+    onloadMore() {
+      this.loadmore = true;
+    },
+    // 时间格式化
+    filterTime(arr) {
+      // 时间戳
+      var timestamp = new Date().getTime();
+      arr.forEach((item, index) => {
+        let foo1 = timestamp - (item.created_time / 1000);
+        let realy = Math.floor(foo1 / 1000)
+        let h = Math.floor(realy / 3600)
+        let m = Math.floor(realy % 3600 / 60)
+        if (h != 0) {
+          var str = `${h}小时${m}分前发布`
+        } else {
+          var str = `${m}分钟前发布`
+        }
+        item.created_time = str;
+      })
+      return arr;
     },
   },
 }
@@ -173,6 +200,21 @@ export default {
         margin-top: 0.08rem;
       }
     }
+  }
+
+  .loadMore {
+    width: 3rem;
+    height: 1rem;
+    margin: 0 auto;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1rem;
+    font-weight: bolder;
+    text-align: center;
+    border-radius: 0.1rem;
+    transition: all 0.2s ease-in-out;
+    background-color: #f8aa00;
+    color: #fff;
   }
 }
 </style>
