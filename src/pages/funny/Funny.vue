@@ -109,11 +109,12 @@ export default {
       let param
       this.toggleShow == 'new' ? flag = 'new' : flag = 'hot';
       // 接口时间戳
-      let infTimestamp = `&_=${new Date().getTime()}`;
+
+      let infTimestamp = new Date().getTime();
       if (flag == 'hot') {
-        param = { 'afterScore': 0, '&_=': infTimestamp, }
+        param = { 'afterScore': 0, '&_': infTimestamp, }
       } else if (flag == 'new') {
-        param = { 'afterTime': 0, '&_=': infTimestamp, }
+        param = { 'afterTime': 0, '&_': infTimestamp, }
       }
 
       try {
@@ -138,11 +139,11 @@ export default {
       let param
       this.toggleShow == 'new' ? flag = 'new' : flag = 'hot';
       // 接口时间戳
-      let infTimestamp = `&_=${new Date().getTime()}`;
+      let infTimestamp = new Date().getTime();
       if (flag == 'hot') {
-        param = { 'afterScore': 0, '&_=': infTimestamp, }
+        param = { 'afterScore': 0, '&_': infTimestamp, }
       } else if (flag == 'new') {
-        param = { 'afterTime': 0, '&_=': infTimestamp, }
+        param = { 'afterTime': 0, '&_': infTimestamp, }
       }
 
       try {
@@ -180,16 +181,16 @@ export default {
       let param
       this.toggleShow == 'new' ? flag = 'new' : flag = 'hot';
       // 接口时间戳
-      let infTimestamp = `&_=${new Date().getTime()}`;
+      let infTimestamp = new Date().getTime();
       if (flag == 'hot') {
         let num = this.randomNum(11224, 11226);
-        param = { 'afterScore': num, '&_=': infTimestamp, }
+        param = { 'afterScore': num, '&_': infTimestamp, }
       } else if (flag == 'new') {
         let n1 = parseInt(new Date().getTime());
         let n2 = parseInt(this.currentIndex * 60 * 60 * 1000)
         let n3 = n1 - n2;
         this.currentIndex += 2;
-        param = { 'afterTime': n3 * 1000, '&_=': infTimestamp, }
+        param = { 'afterTime': n3 * 1000, '&_': infTimestamp, }
       }
 
       try {

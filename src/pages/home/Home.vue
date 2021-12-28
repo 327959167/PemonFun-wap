@@ -122,9 +122,9 @@ export default {
       // 轮播图
       banner: [
         {
-          url: "https://www.webhek.com/misc-res/species-in-pieces/#",
-          img: "https://www.webhek.com/misc-res/species-in-pieces/img/assets/polygon-demo.png",
-          introduce: "直接进入30个CSS碎片拼图，30种濒临灭绝动物",
+          url: "http://guozhivip.com/lab/",
+          img: "https://img0.baidu.com/it/u=1578762854,2915076460&fm=26&fmt=auto",
+          introduce: "果汁实验室，发现国内外优质网站",
         },
         {
           url: "https://www.agefans.vip/",
@@ -145,12 +145,12 @@ export default {
       // 每日头条
       headlines: [
         {
-          interface: "/link/hot?afterTime=1636558205018000",
+          interface: "/link/hot?afterTime=1638854405038000",
           title: "微博",
           icon: "https://www.weibo.com/favicon.ico"
         },
         {
-          interface: "/link/hot?afterTime=1638854405038000",
+          interface: "/link/hot?afterTime=1639903834020000",
           title: "今日头条",
           icon: "https://www.toutiao.com/favicon.ico"
         },

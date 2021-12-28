@@ -68,7 +68,6 @@ export default new Router({
     if (savedPosition) {
       return savedPosition
     } else {
-      console.log(savedPosition, ">>>>");
       return { x: 0, y: 0 } //期望滚动到哪个的位置
     }
   },
