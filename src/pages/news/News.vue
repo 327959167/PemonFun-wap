@@ -59,10 +59,10 @@ export default {
       await this.getNews(url)
     },
     // 接口调用
-    async getNews(url) {
+    async getNews(url, afterScore) {
       let param, flag = false;
       let infTimestamp = new Date().getTime();
-      param = { 'afterScore': 0, '&_': infTimestamp, }
+      param = { 'afterScore': afterScore || 0, '&_': infTimestamp, }
       try {
         let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
@@ -100,8 +100,9 @@ export default {
         });
       }
     },
-    onloadMore() {
-      this.loadmore = true;
+    async onloadMore() {
+      // this.loadmore = true;
+      Toast.fail('没接口，人家接口不让白嫖，小南锅')
     },
     // 时间格式化
     filterTime(arr) {
