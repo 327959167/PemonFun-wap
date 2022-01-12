@@ -1,7 +1,7 @@
 <template>
   <div class="publicheader ub ub-ac">
     <div class="back ub ub-ac ub-pc" @click="back">&lt;</div>
-    <div class="search ub-f1 ub ub-ac">
+    <div class="search ub-f1 ub ub-ac" @click="search">
       <div>{{showHotIntro.txt}}</div>
     </div>
     <div class="service ub ub-ac ub-pc" @click="service">
@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import { Toast } from 'vant';
 export default {
   data() {
     return {
@@ -39,12 +40,15 @@ export default {
   methods: {
     back() {
       let url = this.$store.state.backUrl;
-      if (url !== "mine" && url !== "news" && url !== "funny") {
+      if (url !== "mine" && url !== "news" && url !== "funny" && url !== "home") {
         this.$router.go(-1);
       }
     },
+    search() {
+      Toast.success("祈祷世界和平，程序员不在内卷")
+    },
     service() {
-      window.location.href = 'https://327959167.github.io/MusicPlayer/longjin-MusicAudio/music.html';
+      Toast.fail("我累了，找到富萝莉后有时间以后再写吧")
     },
     hotNews() {
       this.showHotIntro = this.hotIncident[Math.floor((Math.random() * this.hotIncident.length))];

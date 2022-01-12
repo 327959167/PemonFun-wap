@@ -155,7 +155,7 @@ export default {
           icon: "https://www.toutiao.com/favicon.ico"
         },
         {
-          interface: "/man?afterTime=1639107459244000",
+          interface: "/man?afterTime=1643107459244000",
           title: "知乎",
           icon: "https://www.zhihu.com/favicon.ico"
         },
@@ -296,7 +296,7 @@ export default {
     },
     async getGuessLike() {
       let timestamp = `&_=${new Date().getTime()}`;
-      let path = `/apiGas/man?afterTime=1639107459244000${timestamp}`;
+      let path = `/apiGas/man?afterTime=1641107459244000${timestamp}`;
       try {
         let res = await this.$get(path);
         if (res.success && res.code == 200) {
