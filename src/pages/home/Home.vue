@@ -150,7 +150,7 @@ export default {
           icon: "https://www.weibo.com/favicon.ico"
         },
         {
-          interface: "/link/hot?afterTime=1639903834020000",
+          interface: "/link/hot?afterTime=1641903834020000",
           title: "今日头条",
           icon: "https://www.toutiao.com/favicon.ico"
         },

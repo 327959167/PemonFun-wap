@@ -183,7 +183,7 @@ export default {
       // 接口时间戳
       let infTimestamp = new Date().getTime();
       if (flag == 'hot') {
-        let num = this.randomNum(11224, 11226);
+        let num = this.randomNum(12224, 12226);
         param = { 'afterScore': num, '&_': infTimestamp, }
       } else if (flag == 'new') {
         let n1 = parseInt(new Date().getTime());
