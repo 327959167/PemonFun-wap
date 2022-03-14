@@ -8,29 +8,13 @@
 
 <script>
 export default {
-  data() {
-    return {
-      backtopShow: false,
-    }
-  },
-  mounted() {
-    window.addEventListener("scroll", this.handleScroll);
-  },
+  data() { return { backtopShow: false, } },
+  mounted() { window.addEventListener("scroll", this.handleScroll); },
   methods: {
-    backtop() {
-      window.scroll({
-        top: 0,
-        behavior: "smooth",
-      });
-    },
+    backtop() { window.scroll({ top: 0, behavior: "smooth", }); },
     handleScroll() {
-      //获取滚动时的高度
       let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-      if (scrollTop > 400) {
-        this.backtopShow = true;
-      } else {
-        this.backtopShow = false;
-      }
+      scrollTop > 400 ? this.backtopShow = true : this.backtopShow = false;
     },
   },
 }
