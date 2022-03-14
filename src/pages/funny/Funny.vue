@@ -255,9 +255,10 @@ export default {
   font-weight: 400;
   color: #1a1a1a;
   font-family: Microsoft YaHei;
-  background-color: #f5f5f5;
   padding-top: 0.5rem;
   position: relative;
+  padding-top: 1.2rem;
+  padding-bottom: 2rem;
 
   .toggle {
     width: 96%;

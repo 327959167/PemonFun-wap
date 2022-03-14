@@ -15,7 +15,7 @@
         <input type="checkbox" v-model="check">&nbsp;我已仔细阅读并同意<span @click="agree">《王龙金的霸王隐私条款》</span>，并愿意承担由此造成的一切损失。
       </div>
       <div class="submit" @click="submit">登录</div>
-      <div class="register"><span @click="register">没有账号，去注册</span></div>
+      <div class="register"><span @click="register">没有账号，去注册→</span></div>
     </div>
   </div>
 </template>
@@ -95,9 +95,12 @@ export default {
   box-sizing: border-box;
 
   h2 {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #ffffff;
-    text-shadow: 0 0 0.2rem rgba(254, 254, 70, 0.8);
+    letter-spacing: 0.15rem;
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #e91e63,
+      0 0 70px #e91e63, 0 0 80px #e91e63, 0 0 100px #e91e63, 0 0 150px #e91e63;
+    margin-bottom: 1.2rem;
   }
 
   .input {
@@ -119,6 +122,7 @@ export default {
       padding: 0rem 0.2rem !important;
       box-sizing: border-box !important;
       background: rgba(255, 255, 255, 0) !important;
+      margin-top: -0.03rem;
     }
 
     span {
@@ -132,7 +136,7 @@ export default {
   }
 
   .agree {
-    padding: 0px 1rem;
+    padding: 0.6rem 1rem;
     box-sizing: border-box;
     color: #292929;
     font-size: 0.4rem;
@@ -148,9 +152,9 @@ export default {
     line-height: 1.1rem;
     text-align: center;
     border-radius: 1.1rem;
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     background-color: royalblue;
-    box-shadow: 0 0 8px 0px royalblue;
+    box-shadow: 0 0 15px 0px rgb(61, 104, 233);
     color: #ffffff;
     margin-top: 0.8rem;
   }

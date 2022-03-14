@@ -10,7 +10,7 @@ import VueLazyLoad from 'vue-lazyload'
 import waterfall from 'vue-waterfall2'
 
 Vue.use(waterfall)
-Vue.use(VueLazyLoad, { error: '/static/image/public/error.png', loading: '/static/image/public/loading.png' })
+Vue.use(VueLazyLoad, { error: '/static/image/public/error.jpg', loading: '/static/image/public/loading.png' })
 Vue.use(Vant);
 
 Vue.config.productionTip = false;

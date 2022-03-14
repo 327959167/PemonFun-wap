@@ -37,6 +37,12 @@ export default {
     bottomNavigation(bar1) {
       this.barShow = bar1;
     },
+    // 图片加载失败时的默认图片
+    // errImg() {
+    //   setTimeout(document.querySelector('img').each(function () {
+    //     document.querySelector('img').attr("onerror", "if(value.length>11)value=value.slice(0,11)");
+    //   }), 1000);
+    // },
   }
 }
 </script>
@@ -49,5 +55,6 @@ export default {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
 }
 </style>

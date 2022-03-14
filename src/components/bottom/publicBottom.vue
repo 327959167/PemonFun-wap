@@ -64,7 +64,7 @@ export default {
   width: 100%;
   height: 1.6rem;
   border-top: 1px solid rgb(230, 227, 227);
-  position: sticky;
+  position: fixed;
   bottom: 0;
   left: 0;
   z-index: 999;

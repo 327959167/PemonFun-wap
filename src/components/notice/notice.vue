@@ -38,7 +38,7 @@ export default {
           noticeTxt.scrollLeft++;
         }
       }
-      setInterval(scrollLeft, 35);
+      setInterval(scrollLeft, 40);
     },
     closeNotice() { this.showNotice = false; this.$refs.notice.style.height = 0; },
   }
@@ -55,7 +55,7 @@ export default {
   font-weight: 400;
   font-family: Microsoft YaHei;
   position: absolute;
-  top: 0;
+  top: 1.2rem;
   left: 0;
   z-index: 98;
   .noticeIcon,

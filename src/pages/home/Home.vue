@@ -25,10 +25,10 @@
               </div>
               <div v-else>
                 <li class="ub" v-for="(skyItem,skyIndex) in headlinesHot" :key="skyIndex" @click="skip(skyItem.url)">
-                  <div class="ub-shrink0">{{skyIndex}}</div>
+                  <div class="ub-shrink0">{{skyIndex+1}}</div>
                   <div class="ub-f1">{{skyItem.title}}</div>
                   <div>
-                    <van-icon name="fire-o" color="#ee0a24" />&nbsp;<span>{{skyItem.ups}}</span>
+                    <van-icon name="fire" color="#ff3d00" />&nbsp;<span>{{skyItem.ups}}</span>
                   </div>
                 </li>
               </div>
@@ -50,7 +50,7 @@
         <div v-else>
           <div class="todayHot-item ub" v-for="(itemYou, indexYou) in youheadlines" :key="indexYou" @click="skip(itemYou.url)">
             <div class="left ub-shrink0 ub ub-ac">
-              <img :src="itemYou.img_url" :alt="itemYou.topicName" />
+              <img v-lazy="itemYou.img_url" :alt="itemYou.topicName" />
             </div>
             <div class="right ub-shrink0 ub-f1">
               <div class="title">
@@ -59,7 +59,7 @@
               <div class="txt">{{ itemYou.title }}</div>
               <div class="watch ub-f1 ub ub-ac ub-pe">
                 <div class="ub ub-ac">
-                  <van-icon name="fire-o" color="#ee0a24" /><span>{{itemYou.ups}}</span>
+                  <van-icon name="fire" color="#ff3d00" /><span>{{itemYou.ups}}</span>
                 </div>
                 <div class="ub ub-ac">
                   <van-icon name="chat-o" /><span>{{ itemYou.comments_count }}</span>
@@ -81,19 +81,18 @@
       </div>
       <div class="ub ub-ver">
         <div class="todayHot-item ub" v-for="(item, index) in guesslike" :key="index" @click="skip(item.url)">
-          <div class="left ub-shrink0">
-            <img :src="item.img_url" :alt="item.topicName" />
+          <div class="left ub-shrink0 ub ub-ac ub-pc">
+            <img v-lazy="item.img_url" :alt="item.topicName" />
           </div>
           <div class="right ub-shrink0 ub-f1">
             <div class="title">
-              <span>{{ item.topicName }}</span>
+              <span v-if="item.topicName">{{ item.topicName }}</span>
+              <span v-else>{{ item.title }}</span>
             </div>
             <div class="txt">{{ item.title }}</div>
             <div class="watch ub-f1 ub ub-ac ub-pe">
               <div class="ub ub-ac">
-                <van-icon name="fire-o" color="#ee0a24" /><span>{{
-                  item.ups
-                }}</span>
+                <van-icon name="fire" color="#ff3d00" /><span>{{item.ups}}</span>
               </div>
               <div class="ub ub-ac">
                 <van-icon name="chat-o" /><span>{{ item.comments_count }}</span>
@@ -127,7 +126,7 @@ export default {
           introduce: "果汁实验室，发现国内外优质网站",
         },
         {
-          url: "https://www.agefans.vip/",
+          url: "https://www.agemys.com/",
           img: "https://img1.baidu.com/it/u=260981461,3886826132&fm=15&fmt=auto",
           introduce: "AGE动漫，值得拥有",
         },
@@ -145,43 +144,42 @@ export default {
       // 每日头条
       headlines: [
         {
-          interface: "/link/hot?afterTime=1638854405038000",
+          interface: "/link/hot?",
           title: "微博",
           icon: "https://www.weibo.com/favicon.ico"
         },
         {
-          interface: "/link/hot?afterTime=1641903834020000",
+          interface: "/link/tec/latest?",
           title: "今日头条",
           icon: "https://www.toutiao.com/favicon.ico"
         },
         {
-          interface: "/man?afterTime=1643107459244000",
+          interface: "/man?",
           title: "知乎",
           icon: "https://www.zhihu.com/favicon.ico"
         },
         {
-          interface: "/link/scoff/hottest?afterScore=11168.805907733333",
+          interface: "/link/scoff/hottest?",
           title: "百度",
           icon: "https://www.baidu.com/favicon.ico"
         },
         {
-          interface: "/link/scoff/latest?afterTime=1636595258044000",
+          interface: "/link/scoff/latest?",
           title: "抖音",
-          icon:
-            "https://img0.baidu.com/it/u=1862947092,1516627745&fm=26&fmt=auto"
+          icon: "https://img0.baidu.com/it/u=1862947092,1516627745&fm=26&fmt=auto"
         },
         {
-          interface: "/link/pic/hottest?afterScore=0",
+          interface: "/link/pic/hottest?",
           title: "澎湃",
           icon: "https://www.thepaper.cn/favicon.ico"
         },
         {
-          interface: "/link/pic/latest?afterTime=0",
+          interface: "/link/pic/latest?",
           title: "豆瓣",
           icon: "https://www.douban.com/favicon.ico"
         },
         {
-          interface: "/link/tec/hottest?afterScore=11169.320485955555",
+          interface: "/link/tec/hottest?",
           title: "掘金",
           icon: "https://www.juejin.cn/favicon.ico"
         }
@@ -222,12 +220,10 @@ export default {
     await this.getHotItem(this.headlines[0].interface);
     await this.getPemon(0, this.youToggle[0].url)
     await this.getGuessLike()
-    this.swiper_home();
+    this.$nextTick(() => { this.swiper_home(); })
   },
   methods: {
-    skip(url) {
-      window.location.href = url;
-    },
+    skip(url) { window.location.href = url; },
     swiper_home() {
       new Swiper(".swiper_home", {
         loop: true,
@@ -235,27 +231,28 @@ export default {
         observer: true,
         autoplayDisableOnInteraction: false,
         autoplay: {
-          delay: 3000,
+          delay: 4000,
           disableOnInteraction: false
         },
         on: {
           tap: function (event) {
             let url = event.target.getAttribute('data-url');
-            if (url != "" && url != null) window.open(url);
+            if (url != "" && url != null) { window.location.href = url };
           },
         },
       });
     },
     async getHotItem(url) {
       // 获取时间戳
-      let timestamp = `&_=${new Date().getTime()}`;
-      // &_=1636598630447
+      let timestamp = `_=${new Date().getTime()}`;
       let path = "/apiGas" + url + timestamp;
+
       if (typeof (this.activeName) == 'number') {
         try {
           let res = await this.$get(path);
           if (res.success && res.code == 200) {
             this.headlinesHot = res.data
+            this.headlinesHot.sort(this.compare("ups", false));
           } else {
             Toast({
               message: '每日头条接口请求失败',
@@ -295,8 +292,7 @@ export default {
       }
     },
     async getGuessLike() {
-      let timestamp = `&_=${new Date().getTime()}`;
-      let path = `/apiGas/man?afterTime=1641107459244000${timestamp}`;
+      let path = `/apiGas/man?_=${new Date().getTime()}`;
       try {
         let res = await this.$get(path);
         if (res.success && res.code == 200) {
@@ -316,6 +312,15 @@ export default {
       this.rotateCount += 1;
       this.$refs.svg.style.transform = `rotate(${360 * this.rotateCount}deg)`;
       await this.getGuessLike();
+    },
+    // 根据数组对象内某一值大小排序
+    compare(property, desc) {
+      return function (a, b) {
+        var value1 = a[property];
+        var value2 = b[property];
+        if (desc == true) { return value1 - value2; }
+        else { return value2 - value1; }
+      }
     },
   }
 };
@@ -342,13 +347,14 @@ export default {
 
 .home {
   width: 100%;
-  min-height: calc(100vh - 3rem);
+  min-height: calc(100vh - 2.8rem);
   font-size: 0.4rem;
   font-weight: 400;
   color: #1a1a1a;
   font-family: Microsoft YaHei;
   position: relative;
-  background-color: #f5f5f5;
+  padding-top: 1.2rem;
+  padding-bottom: 2rem;
 
   .swiper-container {
     width: 100%;
@@ -416,7 +422,7 @@ export default {
   .todayHot {
     width: 96%;
     margin: 0 auto;
-    padding: 0rem 0.25rem;
+    padding: 0rem 0.35rem;
     padding-bottom: 0.6rem;
     box-sizing: border-box;
     border-radius: 0.3rem;
@@ -450,7 +456,7 @@ export default {
       padding: 0.3rem;
       box-sizing: border-box;
       border-radius: 0.2rem;
-      box-shadow: 0 0 0.3rem rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 0.3rem 0rem rgba(0, 0, 0, 0.2);
       margin-top: 0.5rem;
       background-color: #ffffff;
 
@@ -466,7 +472,13 @@ export default {
       }
       .right {
         .title {
+          width: 5rem;
+          height: 0.5rem;
           margin-top: 0.1rem;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          word-break: break-all;
           .circle {
             display: inline-block;
             width: 0.5rem;
@@ -536,7 +548,8 @@ export default {
     border-bottom: none;
   }
   .hotItem li div:nth-of-type(1) {
-    width: 6%;
+    width: 7%;
+    font-style: italic;
     color: rgba(0, 0, 0, 0.54);
   }
   .hotItem li div:nth-of-type(2) {
@@ -550,14 +563,20 @@ export default {
     -webkit-box-orient: vertical;
   }
   .hotItem li div:nth-of-type(3) {
-    width: 14%;
+    width: 15%;
     text-align: center;
     color: rgba(0, 0, 0, 0.54);
   }
-  .hotItem li:nth-of-type(1) div:nth-of-type(1),
-  .hotItem li:nth-of-type(2) div:nth-of-type(1),
+  .hotItem li:nth-of-type(1) div:nth-of-type(1) {
+    color: #ff3d00;
+    font-weight: bold;
+  }
+  .hotItem li:nth-of-type(2) div:nth-of-type(1) {
+    color: #ff6e00;
+    font-weight: bold;
+  }
   .hotItem li:nth-of-type(3) div:nth-of-type(1) {
-    color: #f1403c;
+    color: #ffa600;
     font-weight: bold;
   }
 }
