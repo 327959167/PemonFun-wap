@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <!-- 通知 -->
-    <Notice :scroll="true"><template slot="noticeTxt">{{noticeTxt}}</template></Notice>
+    <Notice :scroll="true" :noticeText="noticeText"></Notice>
     <!-- 回到顶部 -->
     <back-top></back-top>
     <!-- banner轮播 -->
@@ -118,7 +118,7 @@ export default {
   components: { Notice, BackTop, },
   data() {
     return {
-      noticeTxt: "没服务器没后台没接口，数据接口都是网上随便调的，以后有了再弄。唔吼吼吼……",
+      noticeText: ["没服务器没后台没接口，数据接口都是网上随便调的，以后有了再弄。唔吼吼吼……", "期望能找到一份不错的工作！",],
       // 轮播图
       banner: [
         {

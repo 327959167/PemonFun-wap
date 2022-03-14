@@ -1,21 +1,14 @@
-/*
- * @Author: 王龙金 
- * @Date: 2021-11-10 14:33:41 
- * @Last Modified by: 王龙金
- * @Last Modified time: 2021-11-10 15:49:35
- */
-
-
 <template>
   <div class="notice ub" ref="notice">
     <template v-if="showNotice" v-cloak>
       <div class="noticeIcon ub-shrink0">
         <van-icon name="bullhorn-o" />
       </div>
-      <div class="noticeTxt ub-f1">
-        <div id="annunciate">
-          <slot name="noticeTxt">{{defaultNotice}}</slot>
-        </div>
+      <div class="noticeTxt ub-f1 ub" ref="noticeTxt">
+        <ul class="ub" ref="noticeTxt_box1">
+          <li v-for="(item, index) in noticeText" :key="index">{{item}}</li>
+        </ul>
+        <ul class="ub" ref="noticeTxt_box2"></ul>
       </div>
       <div class="closeIcon ub-shrink0" @click="closeNotice">
         <van-icon name="cross" />
@@ -26,36 +19,28 @@
 
 <script>
 export default {
-  props: ['scroll'],
-  data() {
-    return {
-      showNotice: true,
-      defaultNotice: "人生在世只有一次，不必勉强选择自己不喜欢的路，随性而生或随性而死都没关系。不过，无论选择哪条路，都不要忘记保护自己所珍惜的人。",
-    }
+  props: {
+    scroll: { type: Boolean, require: true, default: true, },
+    noticeText: { type: Array, require: true, },
   },
-  mounted() {
-    if (this.scroll == true) this.move();
-  },
+  data() { return { showNotice: true, } },
+  mounted() { if (this.scroll == true) this.move(); },
   methods: {
     move() {
-      // 获取内容区宽度
-      let annunciate = document.getElementById("annunciate");
-      let width = annunciate.scrollWidth;
-      let speed = 10; // 位移距离
-      // 设置位移
-      setInterval(function () {
-        speed = speed - 1;
-        // 如果位移超过文字宽度，则回到起点
-        if (Math.abs(speed) >= width) {
-          speed = 300;
+      let noticeTxt = this.$refs.noticeTxt
+      let box1 = this.$refs.noticeTxt_box1
+      let box2 = this.$refs.noticeTxt_box2
+      box2.innerHTML = box1.innerHTML
+      function scrollLeft() {
+        if (noticeTxt.scrollLeft >= box1.offsetWidth) {
+          noticeTxt.scrollLeft = 0;
+        } else {
+          noticeTxt.scrollLeft++;
         }
-        annunciate.style.transform = "translateX(" + speed + "px)";
-      }, 40);
+      }
+      setInterval(scrollLeft, 35);
     },
-    closeNotice() {
-      this.showNotice = false;
-      this.$refs.notice.style.height = 0;
-    },
+    closeNotice() { this.showNotice = false; this.$refs.notice.style.height = 0; },
   }
 };
 </script>
@@ -63,7 +48,7 @@ export default {
 <style lang="less" scoped>
 .notice {
   width: 100%;
-  height: 0.6rem;
+  height: 0.8rem;
   background-color: #ffffff;
   font-size: 0.4rem;
   color: #f1403c;
@@ -73,25 +58,24 @@ export default {
   top: 0;
   left: 0;
   z-index: 98;
-}
-
-.notice .noticeIcon,
-.notice .closeIcon {
-  width: 12%;
-  height: 100%;
-  line-height: 0.7rem;
-  text-align: center;
-}
-
-.notice .closeIcon {
-  color: #1a1a1a;
-}
-
-.notice .noticeTxt {
-  width: 100%;
-  height: 0.6rem;
-  line-height: 0.6rem;
-  overflow: hidden;
-  white-space: nowrap;
+  .noticeIcon,
+  .closeIcon {
+    width: 12%;
+    line-height: 0.9rem;
+    text-align: center;
+  }
+  .closeIcon {
+    color: #1a1a1a;
+  }
+  .noticeTxt {
+    width: 100%;
+    overflow: hidden;
+    li {
+      height: 0.8rem;
+      line-height: 0.8rem;
+      white-space: nowrap;
+      margin-right: 1rem;
+    }
+  }
 }
 </style>
