@@ -9,7 +9,6 @@
       </template>
       <div :class="{active:barShow == item.nav}">{{item.txt}}</div>
     </div>
-
   </div>
 </template>
 
@@ -72,13 +71,11 @@ export default {
   font-size: 0.3rem;
   color: #000000;
   background-color: #fff;
-
   img {
     width: 0.8rem;
     height: 0.8rem;
     margin-bottom: 0.05rem;
   }
-
   .active {
     color: @primary-color;
   }
