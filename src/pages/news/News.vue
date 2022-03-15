@@ -1,32 +1,41 @@
 <template>
-  <div class="news">
+  <div class="news" id="news">
     <back-top></back-top>
-    <div class="toggle ub ub-ac">
+
+    <div class="toggle ub ub-ac ub-pa">
       <span v-for="(item,index) in toggle" :key="index" :class="{active:item.flag}" @click="cut(item.txt,item.url)">{{item.txt}}</span>
     </div>
-    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-      <ul class="article">
-        <li class="ub" v-for="(item,index) in newsList" :key="index">
-          <div class="top ub ub-ver ub-f1 ub-pb">
-            <div class="txt">{{item.title}}</div>
-            <div class="time">{{item.created_time}}</div>
-          </div>
-          <div class="bottom"><img v-lazy="item.img_url" alt="柚文"></div>
-        </li>
 
-      </ul>
-      <div style="text-align:center;" v-if="newsList.length != 0">
-        <van-button loading-text="加载中..." :loading="loadmore" class="loadMore" @click="onloadMore">加载更多</van-button>
-      </div>
-    </van-pull-refresh>
+    <mescroll-vue ref="mescroll" :down="mescrollDown" :up="mescrollUp" @init="mescrollInit">
+      <template v-if="newsList.length == 0">
+        <div style="text-align:center;margin-top:1rem;">
+          <van-loading size="24px">加载中...</van-loading>
+        </div>
+      </template>
+      <template v-else>
+        <ul class="article">
+          <li class="ub" v-for="(item,index) in newsList" :key="index">
+            <div class="top ub ub-ver ub-f1 ub-pb">
+              <div class="txt">{{item.title}}</div>
+              <div class="time">{{item.created_time}}</div>
+            </div>
+            <div class="bottom"><img v-lazy="item.img_url" alt="柚文"></div>
+          </li>
+        </ul>
+      </template>
+    </mescroll-vue>
+
   </div>
 </template>
 
 <script>
-import backTop from '../../components/backTop/backTop.vue';
 import { Toast } from 'vant';
+import MescrollVue from 'mescroll.js/mescroll.vue'
+import publicMethods from '../../utils/publicMethods.js';
+import BackTop from '../../components/backTop/backTop.vue';
+
 export default {
-  components: { backTop },
+  components: { MescrollVue, BackTop, },
   data() {
     return {
       newsList: [],
@@ -36,9 +45,22 @@ export default {
         { txt: "幽默段子", flag: false, url: "/apiGas/link/scoff/hottest", afterScore: null, },
         { txt: "求助问答", flag: false, url: "/apiGas/link/ask/hottest", afterScore: null, },
       ],
-
-      refreshing: false,
-      loadmore: false,
+      // mescroll
+      mescroll: null,
+      mescrollDown: {
+        auto: false,
+        callback: this.downCallback,
+        textLoading: "拼命加载中……",
+      },
+      mescrollUp: {
+        auto: false,
+        callback: this.upCallback,
+        toTop: {
+          warpId: 'news',
+          src: '../../../static/image/public/backTop.png',
+          warpClass: "backToTop",
+        },
+      },
     }
   },
   activated() {
@@ -46,9 +68,7 @@ export default {
     this.$emit('footer', true);
     this.$emit("bottomNavigation", 'news');
   },
-  async mounted() {
-    await this.getNews(this.toggle[0].url)
-  },
+  async mounted() { await this.getNews(this.toggle[0].url) },
   methods: {
     // 导航切换
     async cut(txt, url) {
@@ -62,12 +82,12 @@ export default {
     async getNews(url, afterScore) {
       let param, flag = false;
       let infTimestamp = new Date().getTime();
-      param = { 'afterScore': afterScore || 0, '&_': infTimestamp, }
+      param = { 'afterScore': afterScore || 0, '_': infTimestamp, }
       try {
         let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
           this.newsList = res.data;
-          this.newsList = this.filterTime(this.newsList);
+          this.newsList = publicMethods.filterTime(this.newsList);
           flag = true;
           return flag;
         } else {
@@ -76,52 +96,57 @@ export default {
             duration: 1500,
             forbidClick: true
           });
+          flag = false;
+          return flag;
         }
       } catch (error) {
         console.log(error);
       }
     },
-    // 下拉刷新
-    async onRefresh() {
-      let url;
+
+    mescrollInit(mescroll) { this.mescroll = mescroll },
+    async downCallback() {
+      let obj = { url: "", afterScore: "", }
       this.toggle.forEach((item, index) => {
-        item.flag == true ? url = item.url : "";
+        if (item.flag) { obj.url = item.url; obj.afterScore = item.afterScore; }
       })
-      let flag = await this.getNews(url);
-      if (flag) {
-        this.refreshing = false;
-        Toast.success("刷新成功！")
-      }
-      else {
-        Toast({
-          message: "刷新失败~~",
-          duration: 1500,
-          forbidClick: true
-        });
-      }
+      let result = await this.getNews(obj.url, obj.afterScore)
+      if (result) { this.$nextTick(() => { this.mescroll.endSuccess(); Toast.success('刷新成功'); }) }
+      else { mescroll.endErr(); Toast.fail('刷新失败，请稍后再试！'); }
     },
-    async onloadMore() {
-      // this.loadmore = true;
-      Toast.fail('没接口，人家接口不让白嫖，小南锅')
-    },
-    // 时间格式化
-    filterTime(arr) {
-      // 时间戳
-      var timestamp = new Date().getTime();
-      arr.forEach((item, index) => {
-        let foo1 = timestamp - (item.created_time / 1000);
-        let realy = Math.floor(foo1 / 1000)
-        let h = Math.floor(realy / 3600)
-        let m = Math.floor(realy % 3600 / 60)
-        if (h != 0) {
-          var str = `${h}小时${m}分前发布`
+    async getMore(url, afterScore) {
+      let param, flag = false;
+      let infTimestamp = new Date().getTime();
+      param = { 'afterScore': afterScore || 0, '_': infTimestamp, }
+      try {
+        let res = await this.$get(url, param);
+        if (res.success && res.code == 200) {
+          let arr = res.data;
+          arr = publicMethods.filterTime(arr);
+          arr.forEach((item, index) => { this.newsList.push(item); })
+          flag = true;
+          return flag;
         } else {
-          var str = `${m}分钟前发布`
+          Toast({
+            message: "猜你喜欢接口请求失败",
+            duration: 1500,
+            forbidClick: true
+          });
+          flag = false;
+          return flag;
         }
-        item.created_time = str;
-      })
-      return arr;
+      } catch (error) {
+        console.log(error);
+      }
     },
+    async upCallback() {
+      let obj = { url: "", afterScore: "", }
+      this.toggle.forEach((item, index) => { if (item.flag) { obj.url = item.url; } })
+      let result = await this.getMore(obj.url, obj.afterScore)
+      if (result) { this.$nextTick(() => { this.mescroll.endSuccess(); }) }
+      else { mescroll.endErr(); Toast.fail('加载失败，请稍后再试！'); }
+    },
+
   },
 }
 </script>
@@ -134,46 +159,41 @@ export default {
   font-weight: 400;
   color: #1a1a1a;
   font-family: Microsoft YaHei;
-  padding-top: 0.5rem;
   position: relative;
   padding-top: 1.2rem;
   padding-bottom: 2rem;
-
   .toggle {
     width: 96%;
-    margin: 0 auto;
-    padding: 0.2rem;
+    padding: 0.2rem 0rem;
     box-sizing: border-box;
+    letter-spacing: 0.02rem;
     background-color: #ffffff;
-    box-shadow: 0 8px 12px #ebedf0;
-    span {
-      margin-right: 0.5rem;
-      border-bottom: 0.05rem solid #ffffff;
-    }
+    border-bottom: 0.03rem solid lightgray;
+    position: fixed;
+    top: 1.7rem;
+    left: 2%;
+    z-index: 2;
     .active {
       color: #f8aa00;
       font-weight: bold;
       border-bottom: 0.05rem solid #f8aa00;
     }
   }
-
   .article {
     width: 96%;
-    margin: 0 auto;
-    margin-top: 0.5rem;
+    margin: 0.5rem auto 0rem;
     background-color: #ffffff;
     padding: 0rem 0.3rem;
+    margin-bottom: 1rem;
     box-sizing: border-box;
-
     li {
-      padding: 0.3rem 0rem;
+      padding: 0.35rem 0rem;
       box-sizing: border-box;
       border-bottom: 0.03rem dotted lightgray;
       &:last-of-type {
         border-bottom: none;
       }
     }
-
     .top {
       .txt {
         line-height: 0.5rem;
@@ -191,11 +211,10 @@ export default {
         margin-top: 0.3rem;
       }
     }
-
     .bottom {
       width: 1.5rem;
       height: 100%;
-      margin-left: 0.3rem;
+      margin-left: 0.4rem;
       img {
         width: 1.5rem;
         height: 1.5rem;
@@ -203,20 +222,20 @@ export default {
       }
     }
   }
-
-  .loadMore {
-    width: 3rem;
+  .mescroll {
+    position: fixed;
+    top: 2.3rem;
+    bottom: 0;
+    height: 18rem;
+  }
+  /deep/ .backToTop {
+    width: 1rem;
     height: 1rem;
-    margin: 0 auto;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    line-height: 1rem;
-    font-weight: bolder;
-    text-align: center;
-    border-radius: 0.1rem;
-    transition: all 0.2s ease-in-out;
-    background-color: #f8aa00;
-    color: #fff;
+    background: rgba(0, 0, 0, 0.4);
+    position: fixed;
+    bottom: 2rem;
+    right: 0.5rem;
+    z-index: 999;
   }
 }
 </style>

@@ -110,8 +110,8 @@ import Swiper from "swiper";
 import "swiper/dist/css/swiper.min.css";
 import { Toast } from 'vant';
 import Notice from '../../components/notice/notice';
-import publicMethods from '../../utils/publicMethods.js';
 import BackTop from '../../components/backTop/backTop.vue';
+import publicMethods from '../../utils/publicMethods.js';
 
 export default {
   components: { Notice, BackTop, },
@@ -252,7 +252,7 @@ export default {
           let res = await this.$get(path);
           if (res.success && res.code == 200) {
             this.headlinesHot = res.data
-            this.headlinesHot.sort(this.compare("ups", false));
+            this.headlinesHot.sort(publicMethods.compare("ups", false));
           } else {
             Toast({
               message: '每日头条接口请求失败',
@@ -267,7 +267,6 @@ export default {
         setTimeout(() => {
           this.headlinesHot = [];
         }, 300)
-
       }
     },
     async getPemon(index, url) {
@@ -312,15 +311,6 @@ export default {
       this.rotateCount += 1;
       this.$refs.svg.style.transform = `rotate(${360 * this.rotateCount}deg)`;
       await this.getGuessLike();
-    },
-    // 根据数组对象内某一值大小排序
-    compare(property, desc) {
-      return function (a, b) {
-        var value1 = a[property];
-        var value2 = b[property];
-        if (desc == true) { return value1 - value2; }
-        else { return value2 - value1; }
-      }
     },
   }
 };

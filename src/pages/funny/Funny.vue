@@ -1,19 +1,22 @@
 <template>
-  <div class="funny">
+  <div class="funny" id="funny">
     <!-- 回到顶部 -->
     <back-top></back-top>
+
     <!-- 切换 -->
-    <div class="toggle ub ub-ac">
-      <span :class="{ active: toggleShow == 'hot' }" @click="toggle('hot')">最热</span>
-      <span :class="{ active: toggleShow == 'new' }" @click="toggle('new')">最新</span>
+    <div class="toggle ub ub-ac" v-cloak>
+      <span v-for="(item,index) in funny" :key="index" :class="{active:item.flag}" @click="toggle(item.txt)">{{item.txt}}</span>
     </div>
-    <!-- 瀑布流 -->
-    <van-pull-refresh v-model="loading" @refresh="onRefresh">
-      <div class="waterfall">
-        <div v-if="newest.length == 0">
-          <van-loading color="#0094ff" type="spinner" vertical size="24px">加载中...</van-loading>
+
+    <mescroll-vue ref="mescroll" :down="mescrollDown" :up="mescrollUp" @init="mescrollInit">
+      <template v-if="newest.length == 0">
+        <div style="text-align:center;margin-top:1rem;">
+          <van-loading size="24px">加载中...</van-loading>
         </div>
-        <div v-else>
+      </template>
+      <template v-else>
+        <!-- 瀑布流 -->
+        <div class="waterfall">
           <waterfall :col="2" :data="newest">
             <ul class="waterfall-item ub-shrink0" v-for="(item, index) in newest" :key="index" @click="skip(item.url)">
               <li class="img">
@@ -38,26 +41,26 @@
                 </div>
                 <div class="txt ub-f1 ub ub-ver">
                   <span>{{ item.submitted_user.nick }}</span>
-                  <span>{{ item.action_time }}</span>
+                  <span>{{ item.created_time }}</span>
                 </div>
               </li>
             </ul>
           </waterfall>
-          <div style="text-align:center;">
-            <van-button loading-text="加载中..." :loading="loading_more" class="loadMore" @click="loadMore">加载更多</van-button>
-          </div>
         </div>
-      </div>
-    </van-pull-refresh>
+      </template>
+    </mescroll-vue>
+
   </div>
 </template>
 
 <script>
-import BackTop from '../../components/backTop/backTop.vue';
 import { Toast } from 'vant';
+import BackTop from '../../components/backTop/backTop.vue';
+import publicMethods from '../../utils/publicMethods.js';
+import MescrollVue from 'mescroll.js/mescroll.vue'
 
 export default {
-  components: { BackTop, },
+  components: { BackTop, MescrollVue, },
   activated() {
     this.$emit("header", true);
     this.$emit("footer", true);
@@ -65,150 +68,111 @@ export default {
   },
   data() {
     return {
-      toggleShow: "hot",
       newest: [],
-      hot: "/apiGas/link/pic/hottest",
-      new: "/apiGas/link/pic/latest",
-      loading: false,
-      loading_more: false,
+      funny: [
+        { id: 0, txt: "最热", flag: true, url: "/apiGas/link/pic/hottest", param: "afterScore", paramN: 0, },
+        { id: 1, txt: "最新", flag: false, url: "/apiGas/link/pic/latest", param: "afterTime", paramN: 0, },
+      ],
       currentIndex: 2,
+      // mescroll
+      mescroll: null,
+      mescrollDown: {
+        auto: false,
+        callback: this.downCallback,
+        textLoading: "拼命加载中……",
+      },
+      mescrollUp: {
+        auto: false,
+        callback: this.upCallback,
+        toTop: {
+          warpId: 'funny',
+          src: '../../../static/image/public/backTop.png',
+          warpClass: "backToTop",
+        },
+      },
     };
   },
   async mounted() {
-    await this.getNewest(this.hot);
+    await this.getNewest(this.funny[0].url, this.funny[0].param, this.funny[0].paramN,);
   },
   methods: {
+    skip(url) { window.location.href = url; },
     async toggle(flag) {
-      this.toggleShow = flag;
-      this.newest = [];
-      if (this.toggleShow == 'new') { await this.getNewest(this.new); }
-      else if (this.toggleShow == 'hot') { await this.getNewest(this.hot); }
-    },
-    skip(url) {
-      window.location.href = url;
-    },
-    filterTime(arr) {
-      // 时间戳
-      var timestamp = new Date().getTime();
-      arr.forEach((item, index) => {
-        let foo1 = timestamp - (item.action_time / 1000);
-        let realy = Math.floor(foo1 / 1000)
-        let h = Math.floor(realy / 3600)
-        let m = Math.floor(realy % 3600 / 60)
-        if (h != 0) {
-          var str = `${h}小时${m}分前发布`
-        } else {
-          var str = `${m}分钟前发布`
-        }
-        item.action_time = str;
+      this.funny.forEach(async (item, index) => {
+        if (item.txt == flag) { item.flag = true; this.newest = []; await this.getNewest(item.url, item.param, item.paramN); }
+        else { item.flag = false; }
       })
-      return arr;
     },
-    async getNewest(url) {
-      let flag;
-      let param
-      this.toggleShow == 'new' ? flag = 'new' : flag = 'hot';
-      // 接口时间戳
-
-      let infTimestamp = new Date().getTime();
-      if (flag == 'hot') {
-        param = { 'afterScore': 0, '&_': infTimestamp, }
-      } else if (flag == 'new') {
-        param = { 'afterTime': 0, '&_': infTimestamp, }
-      }
-
+    async getNewest(url, param, paramN) {
+      let flag, params, infTimestamp;
+      infTimestamp = new Date().getTime();
+      params = `{ "${param}": ${paramN}, '_': ${infTimestamp}, }`
       try {
-        let res = await this.$get(url, param);
+        let res = await this.$get(url, params);
         if (res.success && res.code == 200) {
           this.newest = res.data;
-          this.newest = this.filterTime(this.newest);
+          this.newest = publicMethods.filterTime(this.newest);
+          flag = true;
+          return flag;
         } else {
           Toast({
-            message: "猜你喜欢接口请求失败",
+            message: "柚柚很抱歉，接口请求失败了！",
             duration: 1500,
             forbidClick: true
           });
+          flag = false;
+          return flag;
         }
       } catch (error) {
         console.log(error);
       }
     },
-    // 下拉刷新
-    async getNewest2(url) {
-      let flag;
-      let param
-      this.toggleShow == 'new' ? flag = 'new' : flag = 'hot';
-      // 接口时间戳
-      let infTimestamp = new Date().getTime();
-      if (flag == 'hot') {
-        param = { 'afterScore': 0, '&_': infTimestamp, }
-      } else if (flag == 'new') {
-        param = { 'afterTime': 0, '&_': infTimestamp, }
-      }
 
-      try {
-        let res = await this.$get(url, param);
-        if (res.success && res.code == 200) {
-          this.newest = res.data;
-          this.newest = this.filterTime(this.newest);
-          this.loading = false;
-          Toast('刷新成功');
-        } else {
-          Toast({
-            message: "猜你喜欢接口请求失败",
-            duration: 1500,
-            forbidClick: true
-          });
+    mescrollInit(mescroll) { this.mescroll = mescroll },
+    downCallback() {
+      this.funny.forEach(async (item, index) => {
+        if (item.flag) {
+          let result = await this.getNewest(item.url, item.param, item.paramN);
+          if (result) { this.$nextTick(() => { this.mescroll.endSuccess(); Toast.success('刷新成功'); }) }
+          else { mescroll.endErr(); Toast.fail('刷新失败，请稍后再试！'); }
         }
-      } catch (error) {
-        console.log(error);
-      }
+      })
     },
-    async onRefresh() {
-      let flag;
-      this.toggleShow == 'new' ? flag = "/apiGas/link/pic/latest" : flag = "/apiGas/link/pic/hottest";
-      await this.getNewest2(flag);
-    },
+
     // 加载更多
-    async loadMore() {
-      this.loading_more = true;
-      let flag;
-      this.toggleShow == 'new' ? flag = "/apiGas/link/pic/latest" : flag = "/apiGas/link/pic/hottest";
-      await this.getNewest3(flag);
-    },
-    async getNewest3(url) {
-      let flag;
-      let param
-      this.toggleShow == 'new' ? flag = 'new' : flag = 'hot';
-      // 接口时间戳
-      let infTimestamp = new Date().getTime();
-      if (flag == 'hot') {
-        let num = this.randomNum(12224, 12226);
-        param = { 'afterScore': num, '&_': infTimestamp, }
-      } else if (flag == 'new') {
-        let n1 = parseInt(new Date().getTime());
-        let n2 = parseInt(this.currentIndex * 60 * 60 * 1000)
-        let n3 = n1 - n2;
-        this.currentIndex += 2;
-        param = { 'afterTime': n3 * 1000, '&_': infTimestamp, }
-      }
+    async moreNewest(url) {
+      let param, infTimestamp, result;
+      infTimestamp = new Date().getTime();
+
+      this.funny.forEach(item => {
+        if (item.flag) {
+          if (item.txt == "最热") {
+            let num1 = this.randomNum(11407, 11409);
+            param = { 'afterScore': num1, '_': infTimestamp, }
+          } else if (item.txt == "最新") {
+            let num2 = parseInt(new Date().getTime()) - parseInt(this.currentIndex * 60 * 60 * 1000);
+            param = { 'afterTime': num2 * 1000, '_': infTimestamp, }
+            this.currentIndex += 2;
+          }
+        }
+      })
 
       try {
         let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
-          let foo = [];
-          foo = res.data;
-          foo = this.filterTime(foo);
-          foo.forEach((item, index) => {
-            this.newest.push(item);
-          })
-          this.loading_more = false;
+          let foo = []; foo = res.data;
+          foo = publicMethods.filterTime(foo);
+          foo.forEach(item => { this.newest.push(item); })
+          result = true;
+          return result;
         } else {
           Toast({
-            message: "猜你喜欢接口请求失败",
+            message: "柚柚很抱歉，接口请求失败了！",
             duration: 1500,
             forbidClick: true
           });
+          result = false;
+          return result;
         }
       } catch (error) {
         console.log(error);
@@ -239,7 +203,16 @@ export default {
           return 0;
           break;
       }
-    }
+    },
+    upCallback() {
+      this.funny.forEach(async (item, index) => {
+        if (item.flag) {
+          let result = await this.moreNewest(item.url);
+          if (result) { this.$nextTick(() => { this.mescroll.endSuccess(); }) }
+          else { mescroll.endErr(); Toast.fail('加载失败，请稍后再试！'); }
+        }
+      })
+    },
   }
 };
 </script>
@@ -255,20 +228,22 @@ export default {
   font-weight: 400;
   color: #1a1a1a;
   font-family: Microsoft YaHei;
-  padding-top: 0.5rem;
   position: relative;
   padding-top: 1.2rem;
   padding-bottom: 2rem;
-
   .toggle {
     width: 96%;
-    margin: 0 auto;
     padding: 0.2rem;
     box-sizing: border-box;
+    letter-spacing: 0.02rem;
     background-color: #ffffff;
-    box-shadow: 0 8px 12px #ebedf0;
+    border-bottom: 0.03rem solid lightgray;
+    position: fixed;
+    top: 1.7rem;
+    left: 2%;
+    z-index: 2;
     span {
-      margin-right: 0.5rem;
+      margin-right: 1rem;
     }
     .active {
       color: #f8aa00;
@@ -276,7 +251,6 @@ export default {
       border-bottom: 0.05rem solid #f8aa00;
     }
   }
-
   .waterfall {
     width: 96%;
     margin: 0 auto;
@@ -372,7 +346,7 @@ export default {
         box-sizing: border-box;
       }
       .base .img {
-        margin-right: 0.1rem;
+        margin-right: 0.15rem;
         img {
           width: 1rem;
           height: 1rem;
@@ -390,24 +364,28 @@ export default {
           text-overflow: ellipsis;
           overflow: hidden;
           word-break: break-all;
+          &:nth-of-type(2) {
+            font-size: 0.3rem;
+            color: #929191;
+          }
         }
       }
     }
   }
-
-  .loadMore {
-    width: 3rem;
+  .mescroll {
+    position: fixed;
+    top: 2.3rem;
+    bottom: 0;
+    height: 18rem;
+  }
+  /deep/ .backToTop {
+    width: 1rem;
     height: 1rem;
-    margin: 0 auto;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    line-height: 1rem;
-    font-weight: bolder;
-    text-align: center;
-    border-radius: 0.1rem;
-    transition: all 0.2s ease-in-out;
-    background-color: #f8aa00;
-    color: #fff;
+    background: rgba(0, 0, 0, 0.4);
+    position: fixed;
+    bottom: 2rem;
+    right: 0.5rem;
+    z-index: 999;
   }
 }
 </style>
