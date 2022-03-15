@@ -1,7 +1,7 @@
 <template>
   <div class="backtop">
     <div class="top" @click="backtop" v-if="backtopShow" v-cloak>
-      <van-icon name="back-top" />
+      <img src="../../../static/image/public/backTop.png">
     </div>
   </div>
 </template>
@@ -33,9 +33,11 @@ export default {
 .top {
   width: 1rem;
   height: 1rem;
-  line-height: 1.25rem;
   text-align: center;
-  color: #ffffff;
-  font-size: 0.8rem;
+  img {
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-top: 0.1rem;
+  }
 }
 </style>
