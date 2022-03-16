@@ -415,7 +415,7 @@ export default {
     padding: 0rem 0.35rem;
     padding-bottom: 0.6rem;
     box-sizing: border-box;
-    border-radius: 0.3rem;
+    border-radius: 0.1rem;
     margin-top: 0.6rem;
     background-color: #ffffff;
 
@@ -457,7 +457,8 @@ export default {
         margin-right: 0.3rem;
         img {
           width: 2.5rem;
-          height: 2.5rem;
+          height: 3rem;
+          border-radius: 0.1rem;
         }
       }
       .right {
@@ -469,6 +470,7 @@ export default {
           text-overflow: ellipsis;
           overflow: hidden;
           word-break: break-all;
+          font-weight: bold;
           .circle {
             display: inline-block;
             width: 0.5rem;
@@ -485,6 +487,8 @@ export default {
           width: 100%;
           height: 1.5rem;
           line-height: 0.5rem;
+          font-size: 0.38rem;
+          color: #4b4c4d;
           text-overflow: -o-ellipsis-lastline;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -500,6 +504,9 @@ export default {
           height: 0.4rem;
           div {
             margin-right: 0.3rem;
+            &:nth-of-type(1) {
+              margin-right: 0.5rem;
+            }
             span {
               margin-left: 0.1rem;
             }
@@ -538,12 +545,13 @@ export default {
     border-bottom: none;
   }
   .hotItem li div:nth-of-type(1) {
-    width: 7%;
+    width: 8%;
     font-style: italic;
     color: rgba(0, 0, 0, 0.54);
   }
   .hotItem li div:nth-of-type(2) {
-    color: #1a1a1a;
+    color: #4b4c4d;
+    font-size: 0.38rem;
     text-overflow: -o-ellipsis-lastline;
     overflow: hidden;
     text-overflow: ellipsis;

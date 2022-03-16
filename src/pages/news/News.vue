@@ -196,6 +196,7 @@ export default {
     }
     .top {
       .txt {
+        color: #3a3b3b;
         line-height: 0.5rem;
         text-overflow: -o-ellipsis-lastline;
         overflow: hidden;

@@ -257,13 +257,12 @@ export default {
     margin-top: 0.5rem;
 
     .waterfall-item {
-      width: 95%;
-      margin-bottom: 0.3rem;
-      border: 0.05rem solid #fbc2eb;
+      width: 96%;
+      margin-bottom: 8%;
       background-color: #fff;
-      border-radius: 0.3rem;
+      border-radius: 0.1rem;
       overflow: hidden;
-      box-shadow: 0rem 0rem 0.15rem 0rem rgba(0, 0, 0, 0.2);
+      box-shadow: 0rem 0rem 0.15rem 0rem rgba(0, 0, 0, 0.4);
       .label,
       .title,
       .talk {
@@ -334,6 +333,7 @@ export default {
         -webkit-line-clamp: 2;
         line-clamp: 2;
         -webkit-box-orient: vertical;
+        color: #4b4c4d;
       }
       .talk {
         border-bottom: 0.05rem dotted lightgray;
@@ -360,6 +360,7 @@ export default {
           width: 100%;
           height: 0.6rem;
           line-height: 0.6rem;
+          font-size: 0.38rem;
           white-space: nowrap;
           text-overflow: ellipsis;
           overflow: hidden;
