@@ -274,7 +274,7 @@ export default {
     height: 0.9rem;
     letter-spacing: 0.02rem;
     position: fixed;
-    top: 2.8rem;
+    top: 3.2rem;
     right: 2%;
     z-index: 2;
     .shai_box1 {
