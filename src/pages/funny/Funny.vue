@@ -5,8 +5,18 @@
 
     <!-- 切换 -->
     <div class="toggle ub ub-ac" v-cloak>
-      <span v-for="(item,index) in funny" :key="index" :class="{active:item.flag}" @click="toggle(item.txt)">{{item.txt}}</span>
+      <span v-for="(item,index) in funny" :key="index" :class="{active:item.flag}" @click="toggle(item.txt,item.hottest.url,item.hottest.param1,item.hottest.param2)">{{item.txt}}</span>
     </div>
+
+    <span class="shai ub ub-pb" :class="{opacity0:screenS}" v-cloak>
+      <div class="shai_box1 ub-f1 ub ub-ac" ref="shai_box1">
+        <span :class="{active:screenHot}" @click="toggleHot(true)">最热</span>
+        <span :class="{active:!screenHot}" @click="toggleHot(false)">最新</span>
+      </div>
+      <div class="shai_box2 ub-shrink0 ub ub-ac ub-pc" @click="screen(screenT)">
+        <van-icon name="filter-o" />{{screenT}}
+      </div>
+    </span>
 
     <mescroll-vue ref="mescroll" :down="mescrollDown" :up="mescrollUp" @init="mescrollInit">
       <template v-if="newest.length == 0">
@@ -68,10 +78,18 @@ export default {
   },
   data() {
     return {
+      screenW: 0, // 筛选宽度
+      screenT: "筛选", // 筛选文字
+      screenS: false,  // 筛选显隐
+      screenHot: true, // true:最热 false:最新
       newest: [],
       funny: [
-        { id: 0, txt: "最热", flag: true, url: "/apiGas/link/pic/hottest", param: "afterScore", paramN: 0, },
-        { id: 1, txt: "最新", flag: false, url: "/apiGas/link/pic/latest", param: "afterTime", paramN: 0, },
+        {
+          flag: true,
+          txt: "图片",
+          hottest: { url: "/apiGas/link/pic/hottest", param1: "afterScore", param2: 0, },
+          latest: { url: "/apiGas/link/pic/latest", param1: "afterTime", param2: 0, },
+        },
       ],
       currentIndex: 2,
       // mescroll
@@ -93,22 +111,29 @@ export default {
     };
   },
   async mounted() {
-    await this.getNewest(this.funny[0].url, this.funny[0].param, this.funny[0].paramN,);
+    this.screenW = this.$refs.shai_box1.offsetWidth;
+    this.$refs.shai_box1.style.width = '0rem';
+    await this.getNewest(this.funny[0].hottest.url, this.funny[0].hottest.param1, this.funny[0].hottest.param2);
   },
   methods: {
     skip(url) { window.location.href = url; },
-    async toggle(flag) {
-      this.funny.forEach(async (item, index) => {
-        if (item.txt == flag) { item.flag = true; this.newest = []; await this.getNewest(item.url, item.param, item.paramN); }
-        else { item.flag = false; }
+    async toggle(txt, url, param1, param2) {
+      this.newest = [];
+      this.screenHot = true;
+
+      this.funny.forEach((item, index) => {
+        item.txt == txt ? item.flag = !item.flag : item.flag = false;
+        // if (item.txt == txt) { if (index == 0) { this.screenS = true; } else { this.screenS = false; } }
       })
+
+      await this.getNewest(url, param1, param2)
     },
-    async getNewest(url, param, paramN) {
-      let flag, params, infTimestamp;
+    async getNewest(url, param1, param2) {
+      let flag, param, infTimestamp;
       infTimestamp = new Date().getTime();
-      params = `{ "${param}": ${paramN}, '_': ${infTimestamp}, }`
+      param = { [param1]: param2 || 0, '_': infTimestamp, }
       try {
-        let res = await this.$get(url, params);
+        let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
           this.newest = res.data;
           this.newest = publicMethods.filterTime(this.newest);
@@ -128,35 +153,47 @@ export default {
       }
     },
 
-    mescrollInit(mescroll) { this.mescroll = mescroll },
-    downCallback() {
-      this.funny.forEach(async (item, index) => {
+    // 条件筛选
+    screen() {
+      if (this.screenT == "筛选") {
+        this.$refs.shai_box1.style.width = this.screenW + 'px';
+        this.screenT = "收起";
+      } else if (this.screenT == "收起") {
+        this.$refs.shai_box1.style.width = '0rem';
+        this.screenT = "筛选";
+      }
+    },
+    toggleHot(flag) {
+      this.newest = [];
+      if (flag) { this.screenHot = true; }
+      else { this.screenHot = false; }
+      let _this = this;
+      this.funny.forEach(async item => {
         if (item.flag) {
-          let result = await this.getNewest(item.url, item.param, item.paramN);
-          if (result) { this.$nextTick(() => { this.mescroll.endSuccess(); Toast.success('刷新成功'); }) }
-          else { mescroll.endErr(); Toast.fail('刷新失败，请稍后再试！'); }
+          _this.screenHot == true ? await _this.getNewest(item.hottest.url, item.hottest.param1, item.hottest.param2) : await _this.getNewest(item.latest.url, item.latest.param1, item.latest.param2);
         }
       })
     },
 
-    // 加载更多
-    async moreNewest(url) {
-      let param, infTimestamp, result;
-      infTimestamp = new Date().getTime();
-
-      this.funny.forEach(item => {
+    mescrollInit(mescroll) { this.mescroll = mescroll },
+    async downCallback() {
+      let obj = { url: "", param1: "", param2: "", }
+      let _this = this;
+      this.funny.forEach((item, index) => {
         if (item.flag) {
-          if (item.txt == "最热") {
-            let num1 = this.randomNum(11407, 11409);
-            param = { 'afterScore': num1, '_': infTimestamp, }
-          } else if (item.txt == "最新") {
-            let num2 = parseInt(new Date().getTime()) - parseInt(this.currentIndex * 60 * 60 * 1000);
-            param = { 'afterTime': num2 * 1000, '_': infTimestamp, }
-            this.currentIndex += 2;
-          }
+          if (_this.screenHot) { obj.url = item.hottest.url; obj.param1 = item.hottest.param1; obj.param2 = item.hottest.param2; }
+          else { obj.url = item.latest.url; obj.param1 = item.latest.param1; obj.param2 = item.latest.param2; }
         }
       })
-
+      let result = await this.getNewest(obj.url, obj.param1, obj.param2)
+      if (result) { this.$nextTick(() => { this.mescroll.endSuccess(); Toast.success('刷新成功'); }) }
+      else { mescroll.endErr(); Toast.fail('刷新失败，请稍后再试！'); }
+    },
+    // 加载更多
+    async moreNewest(url, param1, param2) {
+      let param, result;
+      let infTimestamp = new Date().getTime();
+      param = { [param1]: param2 || 0, '_': infTimestamp, }
       try {
         let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
@@ -178,40 +215,29 @@ export default {
         console.log(error);
       }
     },
-    randomNum(minNum, maxNum) {
-      switch (arguments.length) {
-        case 1:
-          return parseFloat(Math.random() * minNum + 1, 10);
-          break;
-        case 2:
-          return parseFloat(Math.random() * (maxNum - minNum + 1) + minNum, 10);
-          break;
-        default:
-          return 0;
-          break;
-      }
-    },
-    randomNum2(minNum, maxNum) {
-      switch (arguments.length) {
-        case 1:
-          return parseInt(Math.random() * minNum + 1, 10);
-          break;
-        case 2:
-          return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
-          break;
-        default:
-          return 0;
-          break;
-      }
-    },
-    upCallback() {
-      this.funny.forEach(async (item, index) => {
+    async upCallback() {
+      let _this = this;
+      let infTimestamp = new Date().getTime();
+      let infTimestamp2 = infTimestamp * 1000 - 10000000000;
+      let randomN = publicMethods.randomNum(11409, 11413); // 最热的参数
+      let randomN3 = publicMethods.randomNum2(infTimestamp2, infTimestamp * 1000); // 最新的参数
+      let randomN2 = publicMethods.randomNum2(1647000000000000, 1647300000000000); // 推荐的参数
+      let obj = { url: "", param1: "", param2: "", }
+
+      this.funny.forEach((item, index) => {
         if (item.flag) {
-          let result = await this.moreNewest(item.url);
-          if (result) { this.$nextTick(() => { this.mescroll.endSuccess(); }) }
-          else { mescroll.endErr(); Toast.fail('加载失败，请稍后再试！'); }
+          if (!this.screenS) {
+            if (_this.screenHot) { obj.url = item.hottest.url; obj.param1 = item.hottest.param1; obj.param2 = randomN; }
+            else { obj.url = item.latest.url; obj.param1 = item.latest.param1; obj.param2 = randomN3; }
+          }
+          else {
+            obj.url = item.hottest.url; obj.param1 = item.hottest.param1; obj.param2 = randomN2;
+          }
         }
       })
+      let result = await this.moreNewest(obj.url, obj.param1, obj.param2)
+      if (result) { this.$nextTick(() => { this.mescroll.endSuccess(); }) }
+      else { mescroll.endErr(); Toast.fail('加载失败，请稍后再试！'); }
     },
   }
 };
@@ -249,6 +275,44 @@ export default {
       color: #f8aa00;
       font-weight: bold;
       border-bottom: 0.05rem solid #f8aa00;
+    }
+  }
+  .opacity0 {
+    opacity: 0;
+  }
+  .shai {
+    height: 0.9rem;
+    letter-spacing: 0.02rem;
+    position: fixed;
+    top: 2.8rem;
+    right: 2%;
+    z-index: 2;
+    .shai_box1 {
+      overflow: hidden;
+      color: #ffffff;
+      background-color: rgba(0, 0, 0, 0.7);
+      transition: all 0.25s linear;
+      span {
+        display: inline-block;
+        min-width: 1rem;
+        text-align: center;
+        margin: 0rem 0.3rem;
+      }
+    }
+    .active {
+      color: #f8aa00;
+      border-bottom: 0.05rem solid #f8aa00;
+    }
+    .shai_box2 {
+      width: 1.5rem;
+      height: 100%;
+      line-height: 0.9rem;
+      letter-spacing: 0rem;
+      color: #ffffff;
+      background-color: rgba(0, 0, 0, 0.7);
+      .van-icon-filter-o::before {
+        margin-top: 0.05rem;
+      }
     }
   }
   .waterfall {
