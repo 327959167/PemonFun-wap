@@ -26,7 +26,7 @@ export default {
       barImg: [
         { id: 0, nav: "home", txt: "首页", img: "static/image/bottom/home.png", img2: "static/image/bottom/active_home.png", },
         { id: 1, nav: "news", txt: "柚文", img: "static/image/bottom/news.png", img2: "static/image/bottom/active_news.png", },
-        { id: 2, nav: "funny", txt: "柚趣", img: "static/image/bottom/funny.png", img2: "static/image/bottom/active_funny.png", },
+        { id: 2, nav: "funny", txt: "柚图", img: "static/image/bottom/funny.png", img2: "static/image/bottom/active_funny.png", },
         { id: 3, nav: "mine", txt: "我的", img: "static/image/bottom/mine.png", img2: "static/image/bottom/active_mine.png", },
       ],
     };
