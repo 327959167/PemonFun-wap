@@ -3,8 +3,18 @@
     <back-top></back-top>
 
     <div class="toggle ub ub-ac ub-pa">
-      <span v-for="(item,index) in toggle" :key="index" :class="{active:item.flag}" @click="cut(item.txt,item.url)">{{item.txt}}</span>
+      <span v-for="(item,index) in toggle" :key="index" :class="{active:item.flag}" @click="cut(item.txt,item.hottest.url,item.hottest.param1,item.hottest.param2)">{{item.txt}}</span>
     </div>
+
+    <span class="shai ub ub-pb" :class="{opacity0:screenS}" v-cloak>
+      <div class="shai_box1 ub-f1 ub ub-ac" ref="shai_box1">
+        <span :class="{active:screenHot}" @click="toggleHot(true)">最热</span>
+        <span :class="{active:!screenHot}" @click="toggleHot(false)">最新</span>
+      </div>
+      <div class="shai_box2 ub-shrink0 ub ub-ac ub-pc" @click="screen(screenT)">
+        <van-icon name="filter-o" />{{screenT}}
+      </div>
+    </span>
 
     <mescroll-vue ref="mescroll" :down="mescrollDown" :up="mescrollUp" @init="mescrollInit">
       <template v-if="newsList.length == 0">
@@ -38,12 +48,42 @@ export default {
   components: { MescrollVue, BackTop, },
   data() {
     return {
+      screenW: 0, // 筛选宽度
+      screenT: "筛选", // 筛选文字
+      screenS: true,  // 筛选显隐
+      screenHot: true, // true:最热 false:最新
       newsList: [],
       toggle: [
-        { txt: "最新热文", flag: true, url: "/apiGas/link/news/hottest", afterScore: null, },
-        { txt: "人类发布", flag: false, url: "/apiGas/man", afterTime: null, },
-        { txt: "幽默段子", flag: false, url: "/apiGas/link/scoff/hottest", afterScore: null, },
-        { txt: "求助问答", flag: false, url: "/apiGas/link/ask/hottest", afterScore: null, },
+        {
+          flag: true,
+          txt: "推荐",
+          hottest: { url: "/apiGas/link/hot", param1: "afterTime", param2: 0, },
+          latest: { url: "/apiGas/link/hot", param1: "afterTime", param2: 0, },
+        },
+        {
+          flag: false,
+          txt: "大荟萃",
+          hottest: { url: "/apiGas/link/news/hottest", param1: "afterScore", param2: 0, },
+          latest: { url: "/apiGas/link/news/latest", param1: "afterTime", param2: 0, },
+        },
+        {
+          flag: false,
+          txt: "幽默段子",
+          hottest: { url: "/apiGas/link/scoff/hottest", param1: "afterScore", param2: 0, },
+          latest: { url: "/apiGas/link/scoff/latest", param1: "afterTime", param2: 0, },
+        },
+        {
+          flag: false,
+          txt: "程序猿",
+          hottest: { url: "/apiGas/link/tec/hottest", param1: "afterScore", param2: 0, },
+          latest: { url: "/apiGas/link/tec/latest", param1: "afterTime", param2: 0, },
+        },
+        {
+          flag: false,
+          txt: "求助问答",
+          hottest: { url: "/apiGas/link/ask/hottest", param1: "afterScore", param2: 0, },
+          latest: { url: "/apiGas/link/ask/latest", param1: "afterTime", param2: 0, },
+        },
       ],
       // mescroll
       mescroll: null,
@@ -68,21 +108,27 @@ export default {
     this.$emit('footer', true);
     this.$emit("bottomNavigation", 'news');
   },
-  async mounted() { await this.getNews(this.toggle[0].url) },
+  async mounted() {
+    this.screenW = this.$refs.shai_box1.offsetWidth;
+    this.$refs.shai_box1.style.width = '0rem';
+    await this.getNews(this.toggle[0].hottest.url, this.toggle[0].hottest.param1, this.toggle[0].hottest.param2)
+  },
   methods: {
     // 导航切换
-    async cut(txt, url) {
+    async cut(txt, url, param1, param2) {
       this.newsList = [];
+      this.screenHot = true;
       this.toggle.forEach((item, index) => {
         item.txt == txt ? item.flag = !item.flag : item.flag = false;
+        if (item.txt == txt) { if (index == 0) { this.screenS = true; } else { this.screenS = false; } }
       })
-      await this.getNews(url)
+      await this.getNews(url, param1, param2)
     },
     // 接口调用
-    async getNews(url, afterScore) {
+    async getNews(url, param1, param2) {
       let param, flag = false;
       let infTimestamp = new Date().getTime();
-      param = { 'afterScore': afterScore || 0, '_': infTimestamp, }
+      param = { [param1]: param2 || 0, '_': infTimestamp, }
       try {
         let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
@@ -103,21 +149,46 @@ export default {
         console.log(error);
       }
     },
+    // 条件筛选
+    screen() {
+      if (this.screenT == "筛选") {
+        this.$refs.shai_box1.style.width = this.screenW + 'px';
+        this.screenT = "收起";
+      } else if (this.screenT == "收起") {
+        this.$refs.shai_box1.style.width = '0rem';
+        this.screenT = "筛选";
+      }
+    },
+    toggleHot(flag) {
+      this.newsList = [];
+      if (flag) { this.screenHot = true; }
+      else { this.screenHot = false; }
+      let _this = this;
+      this.toggle.forEach(async item => {
+        if (item.flag) {
+          _this.screenHot == true ? await _this.getNews(item.hottest.url, item.hottest.param1, item.hottest.param2) : await _this.getNews(item.latest.url, item.latest.param1, item.latest.param2);
+        }
+      })
+    },
 
     mescrollInit(mescroll) { this.mescroll = mescroll },
     async downCallback() {
-      let obj = { url: "", afterScore: "", }
+      let obj = { url: "", param1: "", param2: "", }
+      let _this = this;
       this.toggle.forEach((item, index) => {
-        if (item.flag) { obj.url = item.url; obj.afterScore = item.afterScore; }
+        if (item.flag) {
+          if (_this.screenHot) { obj.url = item.hottest.url; obj.param1 = item.hottest.param1; obj.param2 = item.hottest.param2; }
+          else { obj.url = item.latest.url; obj.param1 = item.latest.param1; obj.param2 = item.latest.param2; }
+        }
       })
-      let result = await this.getNews(obj.url, obj.afterScore)
+      let result = await this.getNews(obj.url, obj.param1, obj.param2)
       if (result) { this.$nextTick(() => { this.mescroll.endSuccess(); Toast.success('刷新成功'); }) }
       else { mescroll.endErr(); Toast.fail('刷新失败，请稍后再试！'); }
     },
-    async getMore(url, afterScore) {
+    async getMore(url, param1, param2) {
       let param, flag = false;
       let infTimestamp = new Date().getTime();
-      param = { 'afterScore': afterScore || 0, '_': infTimestamp, }
+      param = { [param1]: param2 || 0, '_': infTimestamp, }
       try {
         let res = await this.$get(url, param);
         if (res.success && res.code == 200) {
@@ -140,13 +211,30 @@ export default {
       }
     },
     async upCallback() {
-      let obj = { url: "", afterScore: "", }
-      this.toggle.forEach((item, index) => { if (item.flag) { obj.url = item.url; } })
-      let result = await this.getMore(obj.url, obj.afterScore)
+      let _this = this;
+      let infTimestamp = new Date().getTime();
+      let infTimestamp2 = infTimestamp * 1000 - 10000000000;
+      let randomN = publicMethods.randomNum(11409, 11413); // 最热的参数
+      let randomN2 = publicMethods.randomNum2(1647000000000000, 1647300000000000); // 推荐的参数
+      let randomN3 = publicMethods.randomNum2(infTimestamp2, infTimestamp * 1000); // 最新的参数
+      let obj = { url: "", param1: "", param2: "", }
+
+      this.toggle.forEach((item, index) => {
+        if (item.flag) {
+          if (!this.screenS) {
+            if (_this.screenHot) { obj.url = item.hottest.url; obj.param1 = item.hottest.param1; obj.param2 = randomN; }
+            else { obj.url = item.latest.url; obj.param1 = item.latest.param1; obj.param2 = randomN3; }
+          }
+          else {
+            obj.url = item.hottest.url; obj.param1 = item.hottest.param1; obj.param2 = randomN2;
+          }
+        }
+      })
+
+      let result = await this.getMore(obj.url, obj.param1, obj.param2)
       if (result) { this.$nextTick(() => { this.mescroll.endSuccess(); }) }
       else { mescroll.endErr(); Toast.fail('加载失败，请稍后再试！'); }
     },
-
   },
 }
 </script>
@@ -177,6 +265,44 @@ export default {
       color: #f8aa00;
       font-weight: bold;
       border-bottom: 0.05rem solid #f8aa00;
+    }
+  }
+  .opacity0 {
+    opacity: 0;
+  }
+  .shai {
+    height: 0.9rem;
+    letter-spacing: 0.02rem;
+    position: fixed;
+    top: 2.8rem;
+    right: 2%;
+    z-index: 2;
+    .shai_box1 {
+      overflow: hidden;
+      color: #ffffff;
+      background-color: rgba(0, 0, 0, 0.7);
+      transition: all 0.25s linear;
+      span {
+        display: inline-block;
+        min-width: 1rem;
+        text-align: center;
+        margin: 0rem 0.3rem;
+      }
+    }
+    .active {
+      color: #f8aa00;
+      border-bottom: 0.05rem solid #f8aa00;
+    }
+    .shai_box2 {
+      width: 1.5rem;
+      height: 100%;
+      line-height: 0.9rem;
+      letter-spacing: 0rem;
+      color: #ffffff;
+      background-color: rgba(0, 0, 0, 0.7);
+      .van-icon-filter-o::before {
+        margin-top: 0.05rem;
+      }
     }
   }
   .article {

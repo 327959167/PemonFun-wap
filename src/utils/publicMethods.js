@@ -2,7 +2,7 @@
  * @Author: 王龙金 
  * @Date: 2022-03-15 10:06:31 
  * @Last Modified by: 王龙金
- * @Last Modified time: 2022-03-15 10:06:56
+ * @Last Modified time: 2022-03-16 14:25:51
  */
 
 // 数组内取任意个随机值（数组，数目）
@@ -44,9 +44,37 @@ function filterTime(arr) {
   return arr;
 };
 
+// 随机数取值，保留12位数
+function randomNum(minNum, maxNum) {
+  switch (arguments.length) {
+    case 1:
+      return parseFloat(Math.random() * minNum + 1, 10);
+      break;
+    case 2:
+      return parseFloat(Math.random() * (maxNum - minNum + 1) + minNum, 10);
+      break;
+    default:
+      return 0;
+      break;
+  }
+};
+function randomNum2(minNum, maxNum) {
+  switch (arguments.length) {
+    case 1:
+      return parseInt(Math.random() * minNum + 1, 10);
+      break;
+    case 2:
+      return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
+      break;
+    default:
+      return 0;
+      break;
+  }
+};
 
 
-export default { RandomArray, compare, filterTime };
+
+export default { RandomArray, compare, filterTime, randomNum, randomNum2 };
 
 
 
