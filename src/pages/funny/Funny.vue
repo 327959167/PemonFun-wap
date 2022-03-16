@@ -54,6 +54,7 @@
                   <span>{{ item.created_time }}</span>
                 </div>
               </li>
+              <li class="close ub ub-ac ub-pc" @click.stop="closeItem(item.id)" :ref="item.id">×</li>
             </ul>
           </waterfall>
         </div>
@@ -89,6 +90,12 @@ export default {
           txt: "图片",
           hottest: { url: "/apiGas/link/pic/hottest", param1: "afterScore", param2: 0, },
           latest: { url: "/apiGas/link/pic/latest", param1: "afterTime", param2: 0, },
+        },
+        {
+          flag: false,
+          txt: "视频",
+          hottest: { url: "/apiGas/link/video/hottest", param1: "afterScore", param2: 0, },
+          latest: { url: "/apiGas/link/video/latest", param1: "afterTime", param2: 0, },
         },
       ],
       currentIndex: 2,
@@ -174,6 +181,14 @@ export default {
         }
       })
     },
+    closeItem(id) {
+      this.newest.forEach((item, index) => {
+        if (item.id == id) {
+          this.$refs[id][0].classList.add("closeA");
+          this.$refs[id][0].innerHTML = "";
+        }
+      })
+    },
 
     mescrollInit(mescroll) { this.mescroll = mescroll },
     async downCallback() {
@@ -224,10 +239,15 @@ export default {
       let randomN2 = publicMethods.randomNum2(1647000000000000, 1647300000000000); // 推荐的参数
       let obj = { url: "", param1: "", param2: "", }
 
+      let random4 = publicMethods.randomNum(47034, 47037); // 最热的参数
+
       this.funny.forEach((item, index) => {
         if (item.flag) {
           if (!this.screenS) {
-            if (_this.screenHot) { obj.url = item.hottest.url; obj.param1 = item.hottest.param1; obj.param2 = randomN; }
+            if (_this.screenHot) {
+              if (item.txt == "视频") { obj.url = item.hottest.url; obj.param1 = item.hottest.param1; obj.param2 = random4; console.log(">>>"); }
+              else { obj.url = item.hottest.url; obj.param1 = item.hottest.param1; obj.param2 = randomN; console.log(">>no>"); }
+            }
             else { obj.url = item.latest.url; obj.param1 = item.latest.param1; obj.param2 = randomN3; }
           }
           else {
@@ -284,7 +304,7 @@ export default {
     height: 0.9rem;
     letter-spacing: 0.02rem;
     position: fixed;
-    top: 2.8rem;
+    top: 3.2rem;
     right: 2%;
     z-index: 2;
     .shai_box1 {
@@ -327,6 +347,7 @@ export default {
       border-radius: 0.1rem;
       overflow: hidden;
       box-shadow: 0rem 0rem 0.15rem 0rem rgba(0, 0, 0, 0.4);
+      position: relative;
       .label,
       .title,
       .talk {
@@ -434,6 +455,28 @@ export default {
             color: #929191;
           }
         }
+      }
+      .close {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 0.5rem;
+        height: 0.5rem;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: #ffffff;
+        text-align: center;
+        font-size: 0.4rem;
+        border-bottom-left-radius: 70%;
+        opacity: 0.6;
+        transition: all 0.25s;
+      }
+      .closeA {
+        width: 100%;
+        height: 100%;
+        border-bottom-left-radius: 0%;
+        background: #f6f6f6 url("../../../static/image/public/error.jpg")
+          no-repeat 45% 45%;
+        opacity: 1;
       }
     }
   }
