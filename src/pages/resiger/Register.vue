@@ -11,7 +11,6 @@
           <van-radio-group v-model="userMessage.radio" direction="horizontal">
             <van-radio name="1">男</van-radio>
             <van-radio name="2">女</van-radio>
-            <van-radio name="3">其他</van-radio>
           </van-radio-group>
         </template>
       </van-field>
@@ -99,6 +98,9 @@ export default {
 </script>
 
 <style lang="less" scoped>
+/deep/ .resiger .van-cell {
+  line-height: 35px;
+}
 .resiger {
   width: 100%;
   height: 100vh;
@@ -108,7 +110,10 @@ export default {
   background: linear-gradient(to bottom, #9dbdb3, #37b9e9);
 
   h2 {
-    color: #1a1919;
+    font-size: 0.9rem;
+    color: #ffffff;
+    letter-spacing: 0.15rem;
+    margin-bottom: 1.2rem;
   }
 
   .resiger-btn {
@@ -126,20 +131,20 @@ export default {
 
   .van-form {
     width: 100%;
-    padding: 0.6rem 0.2rem;
+    padding: 0.6rem 0.3rem;
     box-sizing: border-box;
     background-color: #fff;
     border-radius: 0.5rem !important;
     overflow: hidden;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 1);
+    box-shadow: 0 0 10px 0px rgba(255, 255, 255, 0.8);
   }
 
   .require {
     position: relative;
     &::before {
       position: absolute;
-      top: 0.4rem;
-      left: 0.2rem;
+      top: 0.3rem;
+      left: 0.1rem;
       content: "*";
       font-size: 0.5rem;
       color: red;

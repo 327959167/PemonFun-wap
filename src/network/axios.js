@@ -7,7 +7,7 @@ import store from '../store/index'
 axios.defaults.timeout = 5000;
 
 // 项目基础路径
-// axios.defaults.baseURL = 'http://152.136.185.210:7878/api/m5';
+// axios.defaults.baseURL = '/api';
 // 根据环境的切换配置基础路径
 // if (process.env.NODE_ENV == 'development') {
 //     axios.defaults.baseURL = 'http://152.136.185.210:7878/api/m5';

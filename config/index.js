@@ -11,6 +11,23 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {},
+    proxyTable: {
+      '/apiGas': {
+        target: 'https://dig.chouti.com',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/apiGas': ''
+        }
+      },
+      '/api': {
+        target: 'https://www.bilibili.com',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': ''
+        }
+      }
+    },
+
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
@@ -65,5 +82,5 @@ module.exports = {
     // `npm run build --report`
     // Set to `true` or `false` to always turn it on or off
     bundleAnalyzerReport: process.env.npm_config_report
-  }
+  },
 }

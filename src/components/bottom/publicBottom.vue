@@ -1,49 +1,34 @@
 <template>
   <div class="publicbottom ub">
-    <div class="ub-f1 ub ub-ver ub-ac ub-pc">
-      <div><img :src="barImg[0]" @click="toggleBar('home', 0)" /></div>
-      <div :class="{ active: barShow == 'home' }" @click="toggleBar('home', 0)">
-        首页
-      </div>
-    </div>
-    <div class="ub-f1 ub ub-ver ub-ac ub-pc">
-      <div><img :src="barImg[1]" @click="toggleBar('news', 1)" /></div>
-      <div :class="{ active: barShow == 'news' }" @click="toggleBar('news', 1)">
-        柚文
-      </div>
-    </div>
-    <div class="ub-f1 ub ub-ver ub-ac ub-pc">
-      <div><img :src="barImg[2]" @click="toggleBar('funny', 2)" /></div>
-      <div :class="{ active: barShow == 'funny' }" @click="toggleBar('funny', 2)">
-        柚趣
-      </div>
-    </div>
-    <div class="ub-f1 ub ub-ver ub-ac ub-pc">
-      <div><img :src="barImg[3]" @click="toggleBar('mine', 3)" /></div>
-      <div :class="{ active: barShow == 'mine' }" @click="toggleBar('mine', 3)">
-        我的
-      </div>
+    <div class="ub-f1 ub ub-ver ub-ac ub-pc" v-for="(item,index) in barImg" :key="index" @click="toggleBar(item.id)">
+      <template v-if="barShow != item.nav">
+        <div><img :src="item.img" alt="item.nav"></div>
+      </template>
+      <template v-else>
+        <div><img :src="item.img2" alt="item.nav"></div>
+      </template>
+      <div :class="{active:barShow == item.nav}">{{item.txt}}</div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
+  props: {
+    barShow: {
+      type: String,
+      require: true,
+      default: 'home',
+    },
+  },
   data() {
     return {
       barImg: [
-        "static/image/bottom/active_home.png",
-        "static/image/bottom/news.png",
-        "static/image/bottom/funny.png",
-        "static/image/bottom/mine.png"
+        { id: 0, nav: "home", txt: "首页", img: "static/image/bottom/home.png", img2: "static/image/bottom/active_home.png", },
+        { id: 1, nav: "news", txt: "柚文", img: "static/image/bottom/news.png", img2: "static/image/bottom/active_news.png", },
+        { id: 2, nav: "funny", txt: "柚图", img: "static/image/bottom/funny.png", img2: "static/image/bottom/active_funny.png", },
+        { id: 3, nav: "mine", txt: "我的", img: "static/image/bottom/mine.png", img2: "static/image/bottom/active_mine.png", },
       ],
-      active_barImg: [
-        "static/image/bottom/active_home.png",
-        "static/image/bottom/active_news.png",
-        "static/image/bottom/active_funny.png",
-        "static/image/bottom/active_mine.png"
-      ],
-      barShow: "home"
     };
   },
   created: function () {
@@ -51,15 +36,7 @@ export default {
     this.$emit("footer", false);
   },
   methods: {
-    toggleBar(txt, number) {
-      this.barImg = [
-        "static/image/bottom/home.png",
-        "static/image/bottom/news.png",
-        "static/image/bottom/funny.png",
-        "static/image/bottom/mine.png"
-      ];
-      this.barShow = txt;
-      this.barImg[number] = this.active_barImg[number];
+    toggleBar(number) {
       switch (number) {
         case 0:
           this.$router.push("/home");
@@ -87,19 +64,18 @@ export default {
   width: 100%;
   height: 1.6rem;
   border-top: 1px solid rgb(230, 227, 227);
-  position: sticky;
+  position: fixed;
   bottom: 0;
-  z-index: 99;
+  left: 0;
+  z-index: 999;
   font-size: 0.3rem;
   color: #000000;
   background-color: #fff;
-
   img {
     width: 0.8rem;
     height: 0.8rem;
     margin-bottom: 0.05rem;
   }
-
   .active {
     color: @primary-color;
   }
